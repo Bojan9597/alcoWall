@@ -23,8 +23,7 @@ class AlcoholCheck(State):
         print("Alcohol level inserted successfully")
         alcoWall.workingWidgetLabel.setText("Alcohol measured correctly")
         print(alcoWall.alcohol_level)
-        self.write_highscore_to_file()
-        self.write_results_to_json_file()
+        self.write_data()
         self.alcohol_check_timer.stop()
         from States.InitialState import InitialState
         return InitialState()  # Transition back to InitialState
@@ -78,7 +77,7 @@ class AlcoholCheck(State):
         }
 
         try:
-            with open("alcohol_results.json", "a") as json_file:
+            with open("jsonFiles/alcohol_results.json", "a") as json_file:
                 json.dump(data, json_file)
                 json_file.write("\n")  # Write each entry on a new line
             print("Results written to JSON file.")
@@ -140,3 +139,14 @@ class AlcoholCheck(State):
             print("Highscores updated.")
         except IOError as e:
             print(f"An error occurred while writing to the highscore file: {e}")
+
+    def write_results_to_database(self):
+        # Read data from the JSON file and write it to the database
+        # If the database is not available, return False
+        #else write data and delete content of the file
+        return False
+
+    def write_data(self):
+        self.write_highscore_to_file()
+        self.write_results_to_json_file()
+        self.write_results_to_database()
