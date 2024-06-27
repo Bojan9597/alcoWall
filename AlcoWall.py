@@ -4,6 +4,7 @@ from PySide6.QtCore import QFile, QUrl, Qt, QTimer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
+from VideoWidget import VideoWidget
 
 class AlcoWall(QWidget):
     _instance = None
@@ -50,9 +51,10 @@ class AlcoWall(QWidget):
         self.monthly_highscore_label = self.ui.findChild(QLabel, "monthlyHighscoreLabel")
         self.weekly_highscore_label = self.ui.findChild(QLabel, "weeklyHighscoreLabel")
 
-        self.workingWidget = self.ui.findChild(QWidget, "workingScreenWidget")
-        self.workingWidgetLabel = self.ui.findChild(QLabel, "workingLabel")
-        self.workingWidget.hide()
+        self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
+        self.workingWidget = VideoWidget('videos/beer1.mp4', self)
+        self.main_videos_widget.layout().addWidget(self.workingWidget)
+
         layout = video_container.layout()
         if layout is None:
             layout = QVBoxLayout(video_container)
@@ -68,6 +70,7 @@ class AlcoWall(QWidget):
 
         self.backgroundImageLabel.hide()
         self.video_widget.show()
+
 
         self.retry_timer = QTimer(self)
         self.retry_timer.timeout.connect(self.retry_load_video)

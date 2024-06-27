@@ -16,12 +16,10 @@ class AlcoholCheck(State):
         self.alcohol_check_timer = QTimer()
         self.alcohol_check_timer.timeout.connect(self.check_next_state)
         self.alcohol_check_timer.start(2000)  # Check every 1 second
-        alcoWall.workingWidgetLabel.setText("Blow hoho")
         print("AlcoholCheck: __init__")
     
     def handle_successful(self):
         print("Alcohol level inserted successfully")
-        alcoWall.workingWidgetLabel.setText("Alcohol measured correctly")
         print(alcoWall.alcohol_level)
         self.write_data()
         self.alcohol_check_timer.stop()
@@ -30,7 +28,6 @@ class AlcoholCheck(State):
 
     def handle_unsuccessful(self):
         print("Alcohol level insertion failed")
-        alcoWall.workingWidgetLabel.setText("blow until you get a number")
         return self
 
     def handle_error(self):
@@ -54,9 +51,9 @@ class AlcoholCheck(State):
     def check_proximity(self):
         try:
             if alcoWall.proximity_distance < 5 and alcoWall.proximity_distance >= 0:
-                alcoWall.workingWidgetLabel.setText("come Closer")
+                pass
             else:
-                alcoWall.workingWidgetLabel.setText("Close enough")
+                pass
         except FileNotFoundError:
             pass
 
