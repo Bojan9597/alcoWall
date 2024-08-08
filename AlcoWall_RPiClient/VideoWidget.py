@@ -1,10 +1,10 @@
 import sys
 import cv2
 import time
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QImage, QPainter, QFont
-from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, QHBoxLayout
-from PySide6.QtWidgets import QLabel, QLCDNumber
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtGui import QImage, QPainter, QFont
+from PySide2.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, QHBoxLayout
+from PySide2.QtWidgets import QLabel, QLCDNumber
 from LCDNumber import LCDNumber
 
 class VideoWidget(QWidget):

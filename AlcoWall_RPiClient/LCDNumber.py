@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QLCDNumber, QApplication
-from PySide6.QtGui import QPainter, QColor, QFont
-from PySide6.QtCore import Qt
+from PySide2.QtWidgets import QLCDNumber, QApplication
+from PySide2.QtGui import QPainter, QColor, QFont
+from PySide2.QtCore import Qt
 import sys
 
 class LCDNumber(QLCDNumber):

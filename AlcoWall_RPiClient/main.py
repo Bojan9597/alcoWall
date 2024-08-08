@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication
 import sys
 from AlcoWall import AlcoWall
 
@@ -12,4 +12,4 @@ if __name__ == "__main__":
     from States.InitialState import InitialState
     alcoWall.current_state = InitialState()
 
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

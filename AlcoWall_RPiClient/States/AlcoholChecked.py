@@ -1,5 +1,5 @@
 import os
-from PySide6.QtCore import QTimer, Qt
+from PySide2.QtCore import QTimer, Qt
 from AlcoWall import AlcoWall
 from States.state import State
 import json

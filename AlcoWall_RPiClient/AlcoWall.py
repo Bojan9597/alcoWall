@@ -1,9 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QUrl, Qt, QTimer
-from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtGui import QPixmap
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide2.QtUiTools import QUiLoader
+from PySide2.QtCore import QFile, QUrl, Qt, QTimer
+from PySide2.QtMultimediaWidgets import QVideoWidget
+from PySide2.QtMultimedia import QMediaPlayer
+from PySide2.QtGui import QPixmap
 from VideoWidget import VideoWidget
 
 class AlcoWall(QWidget):
@@ -50,34 +50,20 @@ class AlcoWall(QWidget):
         self.workingWidget = VideoWidget('videos/beer1.mp4', self)
         self.main_videos_widget.layout().addWidget(self.workingWidget)
 
-        layout = video_container.layout()
-        if layout is None:
-            layout = QVBoxLayout(video_container)
-        layout.addWidget(self.video_widget)
 
-        self.media_player = QMediaPlayer()
-        self.media_player.setVideoOutput(self.video_widget)
-
-        self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
-        self.media_player.play()
-
-        self.media_player.mediaStatusChanged.connect(self.handle_media_status_changed)
+        self.video_widget = VideoWidget('videos/AI.mp4', self)
+        self.video_widget.alcoholSensorText.hide()
+        self.video_widget.proximitySensorText.hide()
+        self.video_widget.resultLabelText.hide()
+        self.video_widget.lcdCounter.hide()
+        self.video_widget.lcdNumber.hide()
+        self.main_videos_widget.layout().addWidget(self.video_widget)
 
         self.backgroundImageLabel.hide()
         self.video_widget.show()
 
-
-        self.retry_timer = QTimer(self)
-        self.retry_timer.timeout.connect(self.retry_load_video)
-        self.retry_interval = 5000
-
         self._initialized = True
         self.current_state = None
-
-    def retry_load_video(self):
-        self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
-        self.backgroundImageLabel.show()
-        self.media_player.play()
 
     def set_background_image(self, widget, image_path):
         pixmap = QPixmap(image_path)

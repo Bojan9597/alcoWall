@@ -1,5 +1,5 @@
 from AlcoWall import AlcoWall
-from PySide6.QtCore import QTimer
+from PySide2.QtCore import QTimer
 import json
 
 alcoWall = AlcoWall()
