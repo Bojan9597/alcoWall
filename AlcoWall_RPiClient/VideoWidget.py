@@ -3,7 +3,10 @@ import cv2
 import time
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QImage, QPainter, QFont
-from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, QHBoxLayout
+from PySide6.QtWidgets import QLabel, QLCDNumber
+from LCDNumber import LCDNumber
+
 class VideoWidget(QWidget):
     def __init__(self, video_path, parent=None):
         super().__init__(parent)
@@ -14,6 +17,36 @@ class VideoWidget(QWidget):
         self.setGeometry(0, 0, 1024, 600)
         self.frame_rate = 0
         self.last_time = time.time()
+
+        self.alcoholSensorText = QLabel("g")
+        self.alcoholSensorText.setStyleSheet("color: white; font-size: 40px;")
+        self.proximitySensorText = QLabel()
+        self.proximitySensorText.setStyleSheet("color: white; font-size: 40px;")
+        self.resultLabelText = QLabel()
+        self.resultLabelText.setStyleSheet("color: white; font-size: 40px;")
+        self.lcdCounter = QLabel()
+        self.lcdCounter.setStyleSheet("color: white; font-size: 80px;")
+        self.lcdCounter.setAlignment(Qt.AlignRight)
+        
+        self.lcdNumber = LCDNumber()
+
+        self.lcdNumber.setStyleSheet("border: none;")
+        self.widget = QWidget()
+        layout1 = QHBoxLayout()
+        layout1.addWidget(self.lcdNumber)
+        layout1.addWidget(self.lcdCounter)
+        self.widget.setLayout(layout1)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.alcoholSensorText)
+        layout.addWidget(self.proximitySensorText)
+        layout.addWidget(self.resultLabelText)
+        layout.addWidget(self.widget)
+        
+
+        self.setLayout(layout)
+
+
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
@@ -49,8 +82,8 @@ class VideoWidget(QWidget):
             painter.setFont(QFont("Arial", 30, QFont.Bold))
             painter.setPen(Qt.white)
             painter.setOpacity(1)
-            text_rect = painter.boundingRect(self.rect(), Qt.AlignCenter, self.text)
-            painter.drawText(text_rect, Qt.AlignCenter, self.text)
+            # text_rect = painter.boundingRect(self.rect(), Qt.AlignCenter, self.text)
+            # painter.drawText(text_rect, Qt.AlignCenter, self.text)
             painter.end()
 
     def closeEvent(self, event):

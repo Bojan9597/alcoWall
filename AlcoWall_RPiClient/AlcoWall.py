@@ -41,15 +41,10 @@ class AlcoWall(QWidget):
         self.ui = loader.load(file, self)
         file.close()
         
-        self.credit_label = self.ui.findChild(QLabel, "creditLabel")
         video_container = self.ui.findChild(QWidget, "videoContainer")
         self.backgroundImageLabel = self.ui.findChild(QLabel, "backgroundImageLabel")
         self.video_widget = QVideoWidget(video_container)
         self.set_background_image(self.backgroundImageLabel, 'images/breathalyzerImage.jpg')
-
-        self.highscore_label = self.ui.findChild(QLabel, "highscoreLabel")
-        self.monthly_highscore_label = self.ui.findChild(QLabel, "monthlyHighscoreLabel")
-        self.weekly_highscore_label = self.ui.findChild(QLabel, "weeklyHighscoreLabel")
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
         self.workingWidget = VideoWidget('videos/beer1.mp4', self)

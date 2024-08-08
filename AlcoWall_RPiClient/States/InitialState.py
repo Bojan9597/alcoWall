@@ -43,7 +43,6 @@ class InitialState(State):
         @return AlcoholCheck: The next state to transition to.
         """
         alcoWall.credit -= 1
-        alcoWall.credit_label.setText(str(alcoWall.credit))
         print("InitialState: handle_successful")
         self.coin_check_timer.stop()
         return AlcoholCheck()  # Transition to AlcoholCheck state
@@ -165,11 +164,3 @@ class InitialState(State):
                     highscores = json.load(file)
             except IOError as e:
                 print(f"An error occurred while reading the highscore file: {e}")
-
-        # Update the highscore variables and labels
-        alcoWall.weekly_highscore = highscores.get("weekly_highscore", 0.0)
-        alcoWall.monthly_highscore = highscores.get("monthly_highscore", 0.0)
-        alcoWall.highscore = highscores.get("highscore", 0.0)
-        alcoWall.weekly_highscore_label.setText("weekly highscore" + str(alcoWall.weekly_highscore))
-        alcoWall.monthly_highscore_label.setText("monthly highscore" + str(alcoWall.monthly_highscore))
-        alcoWall.highscore_label.setText("highscore" + str(alcoWall.highscore))

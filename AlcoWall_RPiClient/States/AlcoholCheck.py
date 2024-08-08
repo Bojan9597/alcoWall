@@ -31,6 +31,8 @@ class AlcoholCheck(State):
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)
         self.elapsed_timer.start(1000)  # Check every 1 second
 
+        self.counterForMeasuring = 10
+
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.show()
@@ -39,15 +41,16 @@ class AlcoholCheck(State):
         self.check_proximity_timer.timeout.connect(self.check_proximity)
         self.check_proximity_timer.start(1000)  # Check every 1 second
 
-        self.alcohol_check_timer = QTimer()
-        self.alcohol_check_timer.timeout.connect(self.check_next_state)
-        self.alcohol_check_timer.start(2000)  # Check every 2 seconds
+        self.counterTimer = QTimer()
+        self.counterTimer.timeout.connect(self.decreaseCounter)
+        self.counterTimer.start(1000)
 
         print("AlcoholCheck: __init__")
-        alcoWall.workingWidget.label1.setText("Blow into the alcohol \n sensor until the beep")
-        alcoWall.workingWidget.label2.setText("")
-        alcoWall.workingWidget.label3.setText("")
-        alcoWall.workingWidget.lcdNumber.display(0)
+        alcoWall.workingWidget.alcoholSensorText.setText("Blow into the alcohol \n sensor until the beep")
+        alcoWall.workingWidget.proximitySensorText.setText("")
+        alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
+        alcoWall.workingWidget.lcdNumber.setValue(0)
+        alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
 
         self.alcohol_local_maximum = 0
         self.alcohol_local_maximum_updated = False
@@ -56,7 +59,6 @@ class AlcoholCheck(State):
         self.alcohol_local_maximum_timer.timeout.connect(self.check_local_maximum)
         self.alcohol_local_maximum_timer.start(300)  # Check every 300 milliseconds
 
-        self.proximity_blowing_checker = 0
 
     def handle_successful(self):
         """
@@ -70,9 +72,16 @@ class AlcoholCheck(State):
         print("Alcohol level inserted successfully")
         print(alcoWall.alcohol_level)
         self.write_data()
-        self.alcohol_check_timer.stop()
         from States.AlcoholChecked import AlcoholChecked
         return AlcoholChecked()  # Transition back to InitialState
+    
+    def decreaseCounter(self):
+        self.counterForMeasuring -= 1
+        print(self.counterForMeasuring)
+        alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
+        if self.counterForMeasuring == 0:
+            self.counterTimer.stop()
+            alcoWall.handle_successful()
 
     def handle_unsuccessful(self):
         """
@@ -136,11 +145,9 @@ class AlcoholCheck(State):
         """
         try:
             if alcoWall.proximity_distance < 5 and alcoWall.proximity_distance >= 0:
-                alcoWall.workingWidget.label2.setText("")
-                self.proximity_blowing_checker += 3
+                alcoWall.workingWidget.proximitySensorText.setText("")
             else:
-                alcoWall.workingWidget.label2.setText("Come closer for a \nprecise measurement")
-                self.proximity_blowing_checker += 1
+                alcoWall.workingWidget.proximitySensorText.setText("Come closer for a \nprecise measurement")
         except FileNotFoundError:
             pass
 
@@ -152,12 +159,13 @@ class AlcoholCheck(State):
         or prompt the user to continue blowing. It also transitions based on the proximity blowing counter.
         """
         try:
-            if self.alcohol_local_maximum > 0.1 and self.alcohol_local_maximum_updated == False:
-                alcoWall.handle_successful()
-            elif self.alcohol_local_maximum <= 0.1 and self.proximity_blowing_checker >= 15:
-                alcoWall.handle_successful()
+            if self.counterForMeasuring < 1:
+                if self.alcohol_local_maximum > 0.1 and self.alcohol_local_maximum_updated == False:
+                    alcoWall.handle_successful()
+                elif self.alcohol_local_maximum <= 0.1:
+                    alcoWall.handle_successful()
             else:
-                alcoWall.workingWidget.label2.setText("Blow into the alcohol \n sensor until the beep")
+                alcoWall.workingWidget.alcoholSensorText.setText("Blow into the alcohol \n sensor until the beep")
         except FileNotFoundError:
             pass
 
@@ -224,17 +232,14 @@ class AlcoholCheck(State):
         if alcoWall.alcohol_level > highscores["weekly_highscore"]:
             highscores["weekly_highscore"] = alcoWall.alcohol_level
             alcoWall.weekly_highscore = alcoWall.alcohol_level
-            alcoWall.weekly_highscore_label.setText("weekly highscore" + str(alcoWall.weekly_highscore))
 
         if alcoWall.alcohol_level > highscores["monthly_highscore"]:
             highscores["monthly_highscore"] = alcoWall.alcohol_level
             alcoWall.monthly_highscore = alcoWall.alcohol_level
-            alcoWall.monthly_highscore_label.setText("monthly highscore" + str(alcoWall.monthly_highscore))
 
         if alcoWall.alcohol_level > highscores["highscore"]:
             highscores["highscore"] = alcoWall.alcohol_level
             alcoWall.highscore = alcoWall.alcohol_level
-            alcoWall.highscore_label.setText("highscore" + str(alcoWall.highscore))
 
         # Write updated highscores back to the file
         try:
@@ -296,3 +301,4 @@ class AlcoholCheck(State):
             self.alcohol_local_maximum_updated = True
         else:
             self.alcohol_local_maximum_updated = False
+        alcoWall.workingWidget.lcdNumber.setValue(self.alcohol_local_maximum)
