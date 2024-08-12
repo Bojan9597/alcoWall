@@ -1,20 +1,39 @@
 from AlcoWall import AlcoWall
 from PySide6.QtCore import QTimer
 import json
-from sensorReadout.CoinAcceptor import CoinAcceptor
+import platform
+
 alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
     def __init__(self):
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_variable_updates)
-        self.coin_check_timer.start(1000) 
-        self.coinAcceptor = CoinAcceptor()
-        self.coinAcceptor.run()
+        self.coin_check_timer.start(1000)
+
+        # Check if the code is running on Raspberry Pi
+        if platform.system() == "Linux" and "arm" in platform.machine():
+            from sensorReadout.CoinAcceptor import CoinAcceptor
+            self.coinAcceptor = CoinAcceptor()
+            self.coinAcceptor.run()
+        else:
+            self.coinAcceptor = None
 
     def check_variable_updates(self):
-        alcoWall.credit += self.coinAcceptor.credit
-        self.coinAcceptor.credit = 0
+        # If running on Raspberry Pi, use CoinAcceptor
+        if self.coinAcceptor:
+            alcoWall.credit += self.coinAcceptor.credit
+            self.coinAcceptor.credit = 0
+        else:
+            # If not running on Raspberry Pi, read from the file
+            try:
+                with open("testFiles/coinInserted.txt", "r") as file:
+                    content = file.read().strip()
+                if content != "":
+                    alcoWall.credit += float(content)  # Assuming the file contains credit amount
+            except FileNotFoundError:
+                pass
+
         try:
             with open("testFiles/proximityCheck.txt", "r") as file:
                 content = file.read().strip()
@@ -22,6 +41,7 @@ class SensorVariableUpdates:
                 alcoWall.proximity_distance = int(content)
         except FileNotFoundError:
             pass
+
         try:
             with open("testFiles/alcoholCheck.txt", "r") as file:
                 content = file.readlines()
@@ -30,6 +50,7 @@ class SensorVariableUpdates:
                 alcoWall.alcohol_level = float(content[1])
         except FileNotFoundError:
             pass
+
         try:
             with open("jsonFiles/errors.json", "r") as file:
                 error_data = json.load(file)
@@ -39,5 +60,5 @@ class SensorVariableUpdates:
         except FileNotFoundError:
             pass
 
-                    
-                
+# Create an instance of SensorVariableUpdates
+sensor_updates = SensorVariableUpdates()
