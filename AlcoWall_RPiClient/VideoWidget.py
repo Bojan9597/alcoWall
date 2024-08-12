@@ -1,21 +1,23 @@
 import sys
-import cv2
 import time
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QImage, QPainter, QFont
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, QHBoxLayout
 from PySide6.QtWidgets import QLabel, QLCDNumber
+import imageio
 from LCDNumber import LCDNumber
 
 class VideoWidget(QWidget):
     def __init__(self, video_path, parent=None):
         super().__init__(parent)
-        self.cap = cv2.VideoCapture(video_path)
-        # self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
-        # self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+
+        # Open the video using imageio
+        self.cap = imageio.get_reader(video_path)
+        self.frame_rate = self.cap.get_meta_data()['fps']
+        
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setGeometry(0, 0, 1024, 600)
-        self.frame_rate = 0
+
         self.last_time = time.time()
 
         self.alcoholSensorText = QLabel("g")
@@ -29,8 +31,8 @@ class VideoWidget(QWidget):
         self.lcdCounter.setAlignment(Qt.AlignRight)
         
         self.lcdNumber = LCDNumber()
-
         self.lcdNumber.setStyleSheet("border: none;")
+        
         self.widget = QWidget()
         layout1 = QHBoxLayout()
         layout1.addWidget(self.lcdNumber)
@@ -43,24 +45,24 @@ class VideoWidget(QWidget):
         layout.addWidget(self.resultLabelText)
         layout.addWidget(self.widget)
         
-
         self.setLayout(layout)
-
-
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(1000 // 30)
+        self.timer.start(1000 // 30)  # Targeting approximately 30 FPS
         self.text = "Blow into the alcohol sensor to start"
 
     def update_frame(self):
-        ret, frame = self.cap.read()
-        if ret:
-            self.frame = frame
-            self.calculate_frame_rate()
-            self.repaint()
-        if not ret:
-            self.loop_video()
+        try:
+            frame = self.cap.get_next_data()
+        except IndexError:
+            # If the video has ended, reset the frame position to loop
+            self.cap.set_image_index(0)  # Reset to the first frame
+            frame = self.cap.get_next_data()
+
+        self.frame = frame
+        self.calculate_frame_rate()
+        self.repaint()
 
     def calculate_frame_rate(self):
         current_time = time.time()
@@ -71,7 +73,7 @@ class VideoWidget(QWidget):
 
     def paintEvent(self, event):
         if hasattr(self, 'frame'):
-            frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+            frame_rgb = self.frame
             h, w, ch = frame_rgb.shape
             bytes_per_line = ch * w
             qt_image = QImage(frame_rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
@@ -82,13 +84,11 @@ class VideoWidget(QWidget):
             painter.setFont(QFont("Arial", 30, QFont.Bold))
             painter.setPen(Qt.white)
             painter.setOpacity(1)
-            # text_rect = painter.boundingRect(self.rect(), Qt.AlignCenter, self.text)
-            # painter.drawText(text_rect, Qt.AlignCenter, self.text)
             painter.end()
 
     def closeEvent(self, event):
-        self.cap.release()
+        self.cap.close()  # Properly close the video reader
         event.accept()
 
     def loop_video(self):
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        self.cap.set_image_index(0)  # Reset to the first frame when looping
