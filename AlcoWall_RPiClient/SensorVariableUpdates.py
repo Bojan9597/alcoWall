@@ -1,7 +1,7 @@
 from AlcoWall import AlcoWall
 from PySide6.QtCore import QTimer
 import json
-
+from sensorReadout.CoinAcceptor import CoinAcceptor
 alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
@@ -9,15 +9,12 @@ class SensorVariableUpdates:
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_variable_updates)
         self.coin_check_timer.start(1000) 
+        self.coinAcceptor = CoinAcceptor()
+        self.coinAcceptor.run()
 
     def check_variable_updates(self):
-        try:
-            with open("testFiles/coinInserted.txt", "r") as file:
-                content = file.read().strip()
-            if content != "":
-                alcoWall.credit += float(content)
-        except FileNotFoundError:
-            pass
+        alcoWall.credit += self.coinAcceptor.credit
+        self.coinAcceptor.credit = 0
         try:
             with open("testFiles/proximityCheck.txt", "r") as file:
                 content = file.read().strip()
