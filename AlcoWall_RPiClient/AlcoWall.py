@@ -43,7 +43,11 @@ class AlcoWall(QWidget):
         
         video_container = self.ui.findChild(QWidget, "videoContainer")
         self.backgroundImageLabel = self.ui.findChild(QLabel, "backgroundImageLabel")
-        self.video_widget = QVideoWidget(video_container)
+        self.video_widget = VideoWidget('videos/AI.mp4', self)
+        self.video_widget.alcoholSensorText.hide()
+        self.video_widget.proximitySensorText.hide()
+        self.video_widget.lcdCounter.hide()
+        self.video_widget.lcdNumber.hide()AlcoWall.py
         self.set_background_image(self.backgroundImageLabel, 'images/breathalyzerImage.jpg')
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
@@ -55,13 +59,13 @@ class AlcoWall(QWidget):
             layout = QVBoxLayout(video_container)
         layout.addWidget(self.video_widget)
 
-        self.media_player = QMediaPlayer()
-        self.media_player.setVideoOutput(self.video_widget)
+        # self.media_player = QMediaPlayer()
+        # self.media_player.setVideoOutput(self.video_widget)
 
-        self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
-        self.media_player.play()
+        # self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
+        # self.media_player.play()
 
-        self.media_player.mediaStatusChanged.connect(self.handle_media_status_changed)
+        # self.media_player.mediaStatusChanged.connect(self.handle_media_status_changed)
 
         self.backgroundImageLabel.hide()
         self.video_widget.show()
