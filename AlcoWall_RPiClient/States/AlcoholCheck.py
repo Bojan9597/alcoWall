@@ -26,6 +26,7 @@ class AlcoholCheck(State):
         - Initializes a counter to track the user's proximity and blowing activity.
         """
         self.start_time = QDateTime.currentDateTime()
+        alcoWall.credit -= 1
 
         self.elapsed_timer = QTimer()
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)

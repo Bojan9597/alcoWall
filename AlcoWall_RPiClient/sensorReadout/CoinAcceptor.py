@@ -23,13 +23,13 @@ class CoinAcceptor:
     def check_credits(self):
         if self.pulse_count == 1:
             self.credit += 0.5
-            print(f"Added 0.5 credit. Total credits: {self.credit}")
+            print("added 0.5 coins")
         elif self.pulse_count == 5:
             self.credit += 1
-            print(f"Added 1 credit. Total credits: {self.credit}")
+            print(f"Added 1 credit")
         elif self.pulse_count == 10:
             self.credit += 2
-            print(f"Added 2 credits. Total credits: {self.credit}")
+            print(f"Added 2 credits.")
         self.pulse_count = 0  # Reset pulse count after updating credits
 
     def run(self):

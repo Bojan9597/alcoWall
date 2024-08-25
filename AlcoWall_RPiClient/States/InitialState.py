@@ -103,7 +103,6 @@ class InitialState(State):
 
         @return AlcoholCheck: The next state to transition to.
         """
-        alcoWall.credit -= 1
         print("InitialState: handle_successful")
         self.coin_check_timer.stop()
         return AlcoholCheck()  # Transition to AlcoholCheck state
