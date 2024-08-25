@@ -31,7 +31,7 @@ class AlcoholCheck(State):
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)
         self.elapsed_timer.start(1000)  # Check every 1 second
 
-        self.counterForMeasuring = 10
+        self.counterForMeasuring = 2
 
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()

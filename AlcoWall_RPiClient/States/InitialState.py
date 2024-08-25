@@ -88,7 +88,7 @@ class InitialState(State):
     def extract_filename_from_url(self, video_url):
         # Extract the filename from the URL path
         parsed_url = urlparse(video_url)
-        return os.path.basename(parsed_url.path)  # Extracts 'BudLight.mp4' from the URL
+        return os.path.basename(parsed_url.path)
     
     def start_fetching_videos(self):
         # Start the retry timer to attempt to fetch a valid URL every 2 seconds

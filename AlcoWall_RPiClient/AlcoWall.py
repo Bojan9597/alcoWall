@@ -80,17 +80,6 @@ class AlcoWall(QWidget):
         widget.setPixmap(pixmap)
         widget.setScaledContents(True)
 
-    def handle_media_status_changed(self, status):
-        if status == QMediaPlayer.EndOfMedia:
-            self.media_player.setPosition(0)
-            self.media_player.play()
-        if status == QMediaPlayer.InvalidMedia:
-            self.retry_timer.start(self.retry_interval)
-            self.video_widget.hide()
-            self.backgroundImageLabel.show()
-        if status == QMediaPlayer.LoadedMedia:
-            self.retry_timer.stop()
-
     def change_state(self, state):
         print(f"Changed state to {type(state).__name__}")  # Debug print to check state changes
         self.current_state = state
