@@ -23,6 +23,7 @@ class SensorVariableUpdates:
         # If running on Raspberry Pi, use CoinAcceptor
         if self.coinAcceptor:
             alcoWall.credit += self.coinAcceptor.credit
+            print("Credit: ", alcoWall.credit)
             self.coinAcceptor.credit = 0
         else:
             # If not running on Raspberry Pi, read from the file

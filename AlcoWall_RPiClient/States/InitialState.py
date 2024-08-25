@@ -28,7 +28,7 @@ class InitialState(State):
 
         This setup ensures that the system is in a ready state to detect coin insertions and handle state transitions based on user interactions and system status.
         """
-        alcoWall.credit = 0 # Remove this line
+        # alcoWall.credit = 0 # Remove this line
         print("InitialState: __init__")
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
@@ -172,6 +172,7 @@ class InitialState(State):
         try:
             # print("Checking coin inserted")
             if alcoWall.credit >= 1:
+                print("credit in check_coin_inserted: ", alcoWall.credit)
                 alcoWall.handle_successful() 
             else:
                 alcoWall.handle_unsuccessful()
