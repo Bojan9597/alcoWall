@@ -43,7 +43,7 @@ class AlcoWall(QWidget):
         
         video_container = self.ui.findChild(QWidget, "videoContainer")
         self.backgroundImageLabel = self.ui.findChild(QLabel, "backgroundImageLabel")
-        self.video_widget = VideoWidget('videos/AI.mp4', self)
+        self.video_widget = VideoWidget(self)
         self.video_widget.alcoholSensorText.hide()
         self.video_widget.proximitySensorText.hide()
         self.video_widget.lcdCounter.hide()
@@ -51,21 +51,13 @@ class AlcoWall(QWidget):
         self.set_background_image(self.backgroundImageLabel, 'images/breathalyzerImage.jpg')
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
-        self.workingWidget = VideoWidget('videos/beer1.mp4', self)
+        self.workingWidget = VideoWidget(self)
         self.main_videos_widget.layout().addWidget(self.workingWidget)
 
         layout = video_container.layout()
         if layout is None:
             layout = QVBoxLayout(video_container)
         layout.addWidget(self.video_widget)
-
-        # self.media_player = QMediaPlayer()
-        # self.media_player.setVideoOutput(self.video_widget)
-
-        # self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
-        # self.media_player.play()
-
-        # self.media_player.mediaStatusChanged.connect(self.handle_media_status_changed)
 
         self.backgroundImageLabel.hide()
         self.video_widget.show()
@@ -87,14 +79,6 @@ class AlcoWall(QWidget):
         pixmap = QPixmap(image_path)
         widget.setPixmap(pixmap)
         widget.setScaledContents(True)
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_A:
-            self.backgroundImageLabel.hide()
-            self.video_widget.show()
-        elif event.key() == Qt.Key_B:
-            self.video_widget.hide()
-            self.backgroundImageLabel.show()
 
     def handle_media_status_changed(self, status):
         if status == QMediaPlayer.EndOfMedia:

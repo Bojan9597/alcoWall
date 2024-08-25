@@ -37,7 +37,7 @@ class AlcoholChecked(State):
         alcoWall.workingWidget.show()   
         self.alcohol_checked_timer = QTimer()
         self.alcohol_checked_timer.timeout.connect(self.check_next_state)
-        self.alcohol_checked_timer.start(10000)  # Check every 5 seconds
+        self.alcohol_checked_timer.start(2000)  # Check every 5 seconds
         alcoWall.workingWidget.lcdNumber.setValue(alcoWall.alcohol_level)
         alcoWall.workingWidget.alcoholSensorText.setText("")
         alcoWall.workingWidget.proximitySensorText.setText("")

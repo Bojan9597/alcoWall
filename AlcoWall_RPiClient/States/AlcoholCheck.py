@@ -58,6 +58,7 @@ class AlcoholCheck(State):
         self.alcohol_local_maximum_timer = QTimer()
         self.alcohol_local_maximum_timer.timeout.connect(self.check_local_maximum)
         self.alcohol_local_maximum_timer.start(300)  # Check every 300 milliseconds
+        alcoWall.workingWidget.play_video('videos/beer1.mp4')
 
 
     def handle_successful(self):
