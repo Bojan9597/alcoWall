@@ -2,6 +2,7 @@ from AlcoWall import AlcoWall
 from PySide6.QtCore import QTimer
 import json
 import platform
+import threading
 
 alcoWall = AlcoWall()
 
@@ -12,10 +13,12 @@ class SensorVariableUpdates:
         self.coin_check_timer.start(1000)
 
         # Check if the code is running on Raspberry Pi
-        if platform.system() == "Linux" and "arm" in platform.machine():
+        print(platform.machine())
+        if platform.system() == "Linux" and "aarch64" in platform.machine():
             from sensorReadout.CoinAcceptor import CoinAcceptor
             self.coinAcceptor = CoinAcceptor()
-            self.coinAcceptor.run()
+            self.coin_thread = threading.Thread(target=self.coinAcceptor.run, daemon=True)
+            self.coin_thread.start()
         else:
             self.coinAcceptor = None
 
