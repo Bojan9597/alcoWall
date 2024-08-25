@@ -81,7 +81,7 @@ class AlcoWall(QWidget):
         widget.setScaledContents(True)
 
     def change_state(self, state):
-        # print(f"Changed state to {type(state).__name__}")  # Debug print to check state changes
+        #print(f"Changed state to {type(state).__name__}")  # Debug print to check state changes
         self.current_state = state
 
     def handle_successful(self):

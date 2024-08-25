@@ -26,7 +26,6 @@ class SensorVariableUpdates:
         # If running on Raspberry Pi, use CoinAcceptor
         if self.coinAcceptor:
             alcoWall.credit += self.coinAcceptor.credit
-            print("Credit: ", alcoWall.credit)
             self.coinAcceptor.credit = 0
         else:
             # If not running on Raspberry Pi, read from the file
@@ -64,5 +63,3 @@ class SensorVariableUpdates:
         except FileNotFoundError:
             pass
 
-# Create an instance of SensorVariableUpdates
-sensor_updates = SensorVariableUpdates()
