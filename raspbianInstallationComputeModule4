@@ -9,9 +9,6 @@ Installing Raspberry Pi OS on a Compute Module with Internal eMMC
 
     Enable USB Boot:
         On your computer, run the following command to initialize the Compute Module’s eMMC:
-
-        bash
-
     sudo rpiboot
 
     This command will expose the eMMC as a USB storage device on your computer.
