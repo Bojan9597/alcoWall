@@ -1,0 +1,39 @@
+Installing Raspberry Pi OS on a Compute Module with Internal eMMC
+
+    Prepare the Compute Module:
+        Insert the Compute Module into the IO board.
+        Place a jumper wire on the nRPI_BOOT pins (J4) on the IO board. This puts the Compute Module into USB boot mode.
+
+    Connect to Your Computer:
+        Use a USB cable to connect the IO Board’s USB slave port (J15) to your computer.
+
+    Enable USB Boot:
+        On your computer, run the following command to initialize the Compute Module’s eMMC:
+
+        bash
+
+    sudo rpiboot
+
+    This command will expose the eMMC as a USB storage device on your computer.
+
+Install Raspberry Pi Imager:
+
+    Update your system and install Raspberry Pi Imager:
+
+    bash
+
+    sudo apt update
+    sudo apt install -y rpi-imager
+
+Flash the OS:
+
+    Launch Raspberry Pi Imager from your applications menu or terminal.
+    Choose OS: Select "Use Custom" to select your preferred OS image (e.g., Raspberry Pi OS or your custom image).
+    Edit Settings: Optionally, edit the settings to configure things like Wi-Fi, SSH, or even add a custom splash screen.
+    Select Storage: Choose the eMMC storage that appeared as a USB device after running rpiboot.
+    Click Write to flash the OS onto the Compute Module's internal eMMC.
+
+Complete Setup:
+
+    Once the flashing process is complete, remove the jumper wire from the nRPI_BOOT pins.
+    Reboot the Compute Module, and it will boot from the internal eMMC with the newly installed OS.
