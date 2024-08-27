@@ -15,6 +15,14 @@ class SensorVariableUpdates:
         # Check if the code is running on Raspberry Pi
         print(platform.machine())
         if platform.system() == "Linux" and "aarch64" in platform.machine():
+            from sensorReadout.DistanceSensor import DistanceSensor
+            self.distanceSensor = DistanceSensor()
+            self.distanceSensorThread = threading.Thread(target=self.distanceSensor.run, daemon=True)
+            self.distanceSensorThread.start()
+            from sensorReadout.AlcoholSensor import AlcoholSensor
+            self.alcoholSensor = AlcoholSensor()
+            self.alcoholSensorThread = threading.Thread(target=self.alcoholSensor.run, daemon=True)
+            self.alcoholSensorThread.start()
             from sensorReadout.CoinAcceptor import CoinAcceptor
             self.coinAcceptor = CoinAcceptor()
             self.coin_thread = threading.Thread(target=self.coinAcceptor.run, daemon=True)
@@ -36,23 +44,27 @@ class SensorVariableUpdates:
                     alcoWall.credit += float(content)  # Assuming the file contains credit amount
             except FileNotFoundError:
                 pass
-
-        try:
-            with open("testFiles/proximityCheck.txt", "r") as file:
-                content = file.read().strip()
-            if content != "":
-                alcoWall.proximity_distance = int(content)
-        except FileNotFoundError:
-            pass
-
-        try:
-            with open("testFiles/alcoholCheck.txt", "r") as file:
-                content = file.readlines()
-                content = [line.strip() for line in content]
-            if content != "" and content[0] == "yes":
-                alcoWall.alcohol_level = float(content[1])
-        except FileNotFoundError:
-            pass
+        if self.distanceSensor:
+            alcoWall.proximity_distance = self.distanceSensor.distance
+        else:
+            try:
+                with open("testFiles/proximityCheck.txt", "r") as file:
+                    content = file.read().strip()
+                if content != "":
+                    alcoWall.proximity_distance = int(content)
+            except FileNotFoundError:
+                pass
+        if self.alcoholSensor:
+            alcoWall.alcohol_level = self.alcoholSensor.alcohol_level
+        else:
+            try:
+                with open("testFiles/alcoholCheck.txt", "r") as file:
+                    content = file.readlines()
+                    content = [line.strip() for line in content]
+                if content != "" and content[0] == "yes":
+                    alcoWall.alcohol_level = float(content[1])
+            except FileNotFoundError:
+                pass
 
         try:
             with open("jsonFiles/errors.json", "r") as file:

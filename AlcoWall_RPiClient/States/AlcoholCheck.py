@@ -32,7 +32,7 @@ class AlcoholCheck(State):
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)
         self.elapsed_timer.start(1000)  # Check every 1 second
 
-        self.counterForMeasuring = 2
+        self.counterForMeasuring = 10
 
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()
@@ -146,7 +146,7 @@ class AlcoholCheck(State):
         for an accurate breathalyzer reading. It updates the UI and a proximity blowing counter accordingly.
         """
         try:
-            if alcoWall.proximity_distance < 5 and alcoWall.proximity_distance >= 0:
+            if alcoWall.proximity_distance < 20 and alcoWall.proximity_distance >= 0:
                 alcoWall.workingWidget.proximitySensorText.setText("")
             else:
                 alcoWall.workingWidget.proximitySensorText.setText("Come closer for a \nprecise measurement")
