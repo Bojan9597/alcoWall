@@ -14,7 +14,7 @@ class SensorVariableUpdates:
 
         # Check if the code is running on Raspberry Pi
         print(platform.machine())
-        if platform.system() == "Linux" and "aarch64" in platform.machine():
+        if platform.system() == "Linux" and "aarch644" in platform.machine():
             from sensorReadout.DistanceSensor import DistanceSensor
             self.distanceSensor = DistanceSensor()
             self.distanceSensorThread = threading.Thread(target=self.distanceSensor.run, daemon=True)
