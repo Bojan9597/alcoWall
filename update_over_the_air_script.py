@@ -46,6 +46,8 @@ def check_for_updates():
     local_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
     remote_commit = subprocess.run(["git", "rev-parse", "origin/main"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
 
+    print(f"Local commit: {local_commit}")
+    print(f"Remote commit: {remote_commit}")
     return local_commit != remote_commit
 
 def main():
