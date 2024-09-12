@@ -6,3 +6,6 @@ __pycache__/
 
 # Ignore compiled Cython files
 *.pyo
+
+# ignore .json
+*.json
