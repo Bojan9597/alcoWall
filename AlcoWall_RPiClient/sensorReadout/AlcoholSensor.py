@@ -26,7 +26,7 @@ class AlcoholSensor:
             while True:
                 analog_value, voltage = self.measure()
                 self.alcohol_level = voltage
-                print(f"Analog Value: {analog_value}, Voltage: {voltage:.3f}V")
+                # print(f"Analog Value: {analog_value}, Voltage: {voltage:.3f}V")
                 time.sleep(interval)
         except KeyboardInterrupt:
             print("Measurement stopped by user.")

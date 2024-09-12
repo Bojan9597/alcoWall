@@ -48,7 +48,7 @@ class DistanceSensor:
         try:
             while True:
                 self.distance = self.measure_distance()
-                print(f"Distance: {self.distance} cm")
+                # print(f"Distance: {self.distance} cm")
                 time.sleep(interval)
         except KeyboardInterrupt:
             print("Measurement stopped by User")
