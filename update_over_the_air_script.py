@@ -28,8 +28,8 @@ def stop_process(process):
 def update_repository():
     """Pull the latest changes from the main branch."""
     print("Updating repository...")
-    subprocess.run(["git", "fetch"], cwd=REPO_PATH)
-    subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=REPO_PATH)
+    subprocess.run(["git", "fetch", "--all"], cwd=REPO_PATH)  # Fetch all remotes
+    subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=REPO_PATH)  # Reset to origin/main
     print("Repository updated.")
 
 def start_script():
@@ -39,8 +39,15 @@ def start_script():
 
 def check_for_updates():
     """Check if local repository is up-to-date with the remote main branch."""
+    # Ensure we're on the main branch
+    current_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
+    print(f"Current branch: {current_branch}")
+    if current_branch != "main":
+        print("Switching to the main branch.")
+        subprocess.run(["git", "checkout", "main"], cwd=REPO_PATH)
+    
     # Fetch updates from the remote repository
-    fetch_result = subprocess.run(["git", "fetch", GIT_URL], cwd=REPO_PATH, capture_output=True)
+    subprocess.run(["git", "fetch", GIT_URL], cwd=REPO_PATH, capture_output=True)
     
     # Check if the local main branch is behind the remote
     local_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
