@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta
 import requests
 from urllib.parse import urlparse
-
+import subprocess
 BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
 
 alcoWall = AlcoWall()
@@ -78,12 +78,55 @@ class InitialState(State):
                         if chunk:
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
-                # Play the downloaded video
+                
+                # Check the resolution of the video
+                resolution = self.get_video_resolution(save_path)
+                print(f"Video resolution: {resolution[0]}x{resolution[1]}")
+
+                # If the resolution is not 1024x600, convert it
+                if resolution != (1024, 600):
+                    print(f"Converting video to 1024x600 resolution...")
+                    self.convert_video_to_resolution(save_path, 1024, 600)
+                    print(f"Video converted successfully to 1024x600.")
+                else:
+                    print("Video resolution is already 1024x600, no conversion needed.")
+
+                # Play the downloaded (or converted) video
                 alcoWall.video_widget.play_video(save_path)
+
             else:
                 print(f"Failed to download video. Status code: {response.status_code}")
         except requests.ConnectionError as e:
             print(f"Connection error while downloading: {e}")
+
+    def get_video_resolution(self, video_path):
+        """Use ffmpeg to get the resolution of the video."""
+        try:
+            result = subprocess.run(
+                ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", 
+                "stream=width,height", "-of", "csv=s=x:p=0", video_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True
+            )
+            width, height = map(int, result.stdout.strip().split('x'))
+            return width, height
+        except Exception as e:
+            print(f"Error getting video resolution: {e}")
+            return None, None
+
+    def convert_video_to_resolution(self, video_path, width, height):
+        """Convert the video to the specified resolution using ffmpeg."""
+        try:
+            temp_path = video_path + "_temp.mp4"
+            subprocess.run(
+                ["ffmpeg", "-i", video_path, "-vf", f"scale={width}:{height}", "-crf", "23", temp_path],
+                check=True
+            )
+            # Replace the original file with the converted one
+            os.replace(temp_path, video_path)
+        except subprocess.CalledProcessError as e:
+            print(f"Error during video conversion: {e}")
     
     def extract_filename_from_url(self, video_url):
         # Extract the filename from the URL path

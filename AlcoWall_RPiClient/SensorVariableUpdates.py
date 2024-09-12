@@ -11,6 +11,9 @@ class SensorVariableUpdates:
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_variable_updates)
         self.coin_check_timer.start(1000)
+        self.distanceSensor = None
+        self.alcoholSensor = None
+        self.coinAcceptor = None
 
         # Check if the code is running on Raspberry Pi
         print(platform.machine())
@@ -63,6 +66,7 @@ class SensorVariableUpdates:
                     content = [line.strip() for line in content]
                 if content != "" and content[0] == "yes":
                     alcoWall.alcohol_level = float(content[1])
+                    print(f"Alcohol level: {alcoWall.alcohol_level}")
             except FileNotFoundError:
                 pass
 
