@@ -71,7 +71,7 @@ class AlcoWall(QWidget):
         self.current_state = None
 
     def retry_load_video(self):
-        self.media_player.setSource(QUrl.fromLocalFile('videos/AI.mp4'))
+        self.media_player.setSource(QUrl.fromLocalFile('videos/output_video.mp4'))
         self.backgroundImageLabel.show()
         self.media_player.play()
 
