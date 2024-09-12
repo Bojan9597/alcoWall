@@ -5,7 +5,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
 from VideoWidget import VideoWidget
-#checking update script  sssssssssss
+#checking update script  ssssssssssss
 class AlcoWall(QWidget):
     _instance = None
 
