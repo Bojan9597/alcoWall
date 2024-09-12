@@ -91,6 +91,7 @@ class AlcoholChecked(State):
         if self.check_errors():
             alcoWall.handle_error()
         else:
+            alcoWall.credit = 0 # remove this line
             alcoWall.handle_successful()
 
     def check_errors(self):
