@@ -74,6 +74,7 @@ def check_for_updates():
 
 def main():
     """Main loop to check for updates every 10 seconds."""
+    start_script()
     while True:
         if check_for_updates():
             print("Repository is out of sync with remote. Updating...")
