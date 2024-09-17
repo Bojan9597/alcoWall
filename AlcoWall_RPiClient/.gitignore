@@ -1,0 +1,11 @@
+# Ignore everything in __pycache__ folders
+__pycache__/
+
+# Ignore all .pyc files
+*.pyc
+
+# Ignore all .mp4 files
+*.mp4
+
+# ignore all .json files
+*.json
