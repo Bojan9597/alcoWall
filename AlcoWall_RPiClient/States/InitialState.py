@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 import requests
 from urllib.parse import urlparse
 import subprocess
-BASE_URL = "https://node.alkowall.indigoingenium.ba1"  # Intentional wrong URL for retry testing
+
+BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
 VIDEOS_DIRECTORY = "videos/"
 DEVICE_ID = 1
 
@@ -16,20 +17,6 @@ from States.AlcoholCheck import AlcoholCheck
 
 class InitialState(State):
     def __init__(self):
-        """
-        @brief Initializes the InitialState.
-
-        This constructor sets up the initial state of the AlcoWall system. It performs the following tasks:
-        
-        - Displays the video widget to the user.
-        - Hides the background image and working widgets.
-        - Retrieves high scores from either the database or a local JSON file.
-        - Sets up a timer to periodically check for coin insertion.
-        
-        The timer is configured to trigger every second, ensuring that the state can promptly respond to user actions.
-
-        This setup ensures that the system is in a ready state to detect coin insertions and handle state transitions based on user interactions and system status.
-        """
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()   
@@ -40,7 +27,7 @@ class InitialState(State):
         self.videos_directory = VIDEOS_DIRECTORY
         self.device_id = DEVICE_ID
         self.retry_timer = QTimer()
-        self.retry_timer.timeout.connect(self.play_next_video())
+        self.retry_timer.timeout.connect(self.play_next_video)
         self.start_fetching_videos()
 
     def play_next_video(self):
@@ -51,11 +38,15 @@ class InitialState(State):
             video_path = os.path.join(self.videos_directory, video_filename)
             
             if os.path.exists(video_path):
-                alcoWall.video_widget.play_video(video_path)
-                self.retry_timer.stop()  # Stop retrying
+                if not self.is_video_corrupted(video_path):
+                    alcoWall.video_widget.play_video(video_path)
+                    self.retry_timer.stop()  # Stop retrying
+                else:
+                    print(f"Video is corrupted, deleting: {video_path}")
+                    os.remove(video_path)
+                    self.retry_timer.start(1000)  # Retry fetching a valid video
             else:
                 self.download_and_play_video(video_url, video_path)
-                self.retry_timer.stop()  # Stop retrying
         else:
             alcoWall.video_widget.play_video("videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
@@ -71,22 +62,41 @@ class InitialState(State):
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
                 
-                resolution = self.get_video_resolution(save_path)
-                print(f"Video resolution: {resolution[0]}x{resolution[1]}")
-
-                if resolution != (1024, 600):
-                    print(f"Converting video to 1024x600 resolution...")
-                    self.convert_video_to_resolution(save_path, 1024, 600)
-                    print(f"Video converted successfully to 1024x600.")
+                if self.is_video_corrupted(save_path):
+                    print(f"Downloaded video is corrupted, deleting: {save_path}")
+                    os.remove(save_path)
+                    alcoWall.video_widget.play_video("videos/beer1.mp4")
                 else:
-                    print("Video resolution is already 1024x600, no conversion needed.")
-
-                alcoWall.video_widget.play_video(save_path)
+                    resolution = self.get_video_resolution(save_path)
+                    print(f"Video resolution: {resolution[0]}x{resolution[1]}")
+                    
+                    if resolution != (1024, 600):
+                        print(f"Converting video to 1024x600 resolution...")
+                        self.convert_video_to_resolution(save_path, 1024, 600)
+                        print(f"Video converted successfully to 1024x600.")
+                    alcoWall.video_widget.play_video(save_path)
 
             else:
                 print(f"Failed to download video. Status code: {response.status_code}")
+                alcoWall.video_widget.play_video("videos/beer1.mp4")
         except requests.ConnectionError as e:
             print(f"Connection error while downloading: {e}")
+
+    def is_video_corrupted(self, video_path):
+        """Check if the video is corrupted using ffmpeg."""
+        try:
+            result = subprocess.run(
+                ["ffmpeg", "-v", "error", "-i", video_path, "-f", "null", "-"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            # If ffmpeg returns an error, the video is likely corrupted
+            if result.returncode != 0:
+                print(f"ffmpeg error: {result.stderr}")
+                return True
+            return False
+        except Exception as e:
+            print(f"Error checking video corruption: {e}")
+            return True
 
     def get_video_resolution(self, video_path):
         """Use ffmpeg to get the resolution of the video."""
@@ -125,61 +135,22 @@ class InitialState(State):
         self.retry_timer.start(1000)  # Retry every 2 seconds
 
     def handle_successful(self):
-        """
-        @brief Handles the successful insertion of a coin.
-
-        This function is called when a coin is successfully inserted. It decreases the credit,
-        updates the credit label, stops the coin check timer, and transitions to the AlcoholCheck state.
-
-        @return AlcoholCheck: The next state to transition to.
-        """
-        print("InitialState: handle_successful")
         self.coin_check_timer.stop()
         return AlcoholCheck()  # Transition to AlcoholCheck state
 
     def handle_unsuccessful(self):
-        """
-        @brief Handles the unsuccessful insertion of a coin.
-
-        This function is called when a coin is not successfully inserted.
-        It simply returns the current state to retry the process.
-
-        @return InitialState: The current state to remain in.
-        """
         return self
     
     def handle_error(self):
-        """
-        @brief Handles errors during the initial state.
-
-        This function is called when an error is detected in the process.
-        It simply prints an error message and returns the current state.
-
-        @return InitialState: The current state to remain in.
-        """
         return InitialState()
     
     def check_next_state(self):
-        """
-        @brief Checks for errors and proceeds to check coin insertion if no errors are found.
-
-        This function is called periodically by a timer to determine whether to transition
-        to the next state or handle an error.
-        """
         if self.check_errors():
             alcoWall.handle_error()
         else:
             self.check_coin_inserted()
 
     def check_errors(self):
-        """
-        @brief Checks for any errors such as open service or coin doors, or coin stuck.
-
-        This function checks various error conditions that might prevent the process
-        from continuing.
-
-        @return bool: True if any error is detected, False otherwise.
-        """
         try:
             if alcoWall.service_door_open or alcoWall.coins_door_open or alcoWall.coin_stuck:
                 return True
@@ -189,12 +160,6 @@ class InitialState(State):
             return True
 
     def check_coin_inserted(self):
-        """
-        @brief Checks if a coin has been inserted.
-
-        This function checks if the user has inserted enough coins to proceed.
-        If so, it handles the successful coin insertion. Otherwise, it handles the unsuccessful attempt.
-        """
         try:
             if alcoWall.credit >= 1:
                 alcoWall.handle_successful() 
@@ -204,35 +169,13 @@ class InitialState(State):
             pass
 
     def get_highscores(self):
-        """
-        @brief Retrieves high scores from the database or local file.
-
-        This function first attempts to get high scores from the database. If that fails,
-        it loads high scores from a local JSON file.
-        """
         if not self.get_highscore_from_database():
             self.load_highscores()
 
     def get_highscore_from_database(self):
-        """
-        @brief Attempts to retrieve high scores from the database.
-
-        This function is a placeholder for database interaction.
-        Currently, it always returns False to indicate that the database is not available.
-
-        @return bool: False if the database is not available.
-        """
         return False
     
     def load_highscores(self):
-        """
-        @brief Loads high scores from a local JSON file.
-
-        This function reads high scores from a specified JSON file and updates the relevant
-        highscore variables and UI labels.
-
-        If the file cannot be read, it handles the IOError and continues.
-        """
         highscore_file = "jsonFiles/highscores.json"
         
         highscores = {
@@ -249,20 +192,20 @@ class InitialState(State):
                 print(f"An error occurred while reading the highscore file: {e}")
 
     def get_ad_url(self, device_id):
-            url = f"{BASE_URL}/advertisment/get_ad_url"
-            payload = {"device_id": device_id}
-            try:
-                response = requests.post(url, json=payload)
-                if response.status_code == 200:
-                    ad_url = response.json().get("ad_url")
-                    if ad_url:
-                        return ad_url
-                    else:
-                        print("No ad URL found in the response.")
-                        return None
+        url = f"{BASE_URL}/advertisment/get_ad_url"
+        payload = {"device_id": device_id}
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                ad_url = response.json().get("ad_url")
+                if ad_url:
+                    return ad_url
                 else:
-                    print(f"Failed to fetch ad URL. Status code: {response.status_code}")
+                    print("No ad URL found in the response.")
                     return None
-            except requests.ConnectionError as e:
-                print(f"Connection error: {e}")
+            else:
+                print(f"Failed to fetch ad URL. Status code: {response.status_code}")
                 return None
+        except requests.ConnectionError as e:
+            print(f"Connection error: {e}")
+            return None
