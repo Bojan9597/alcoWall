@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import requests
 from urllib.parse import urlparse
 import subprocess
+from datetime import date
 
 BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
 VIDEOS_DIRECTORY = "videos/"
@@ -175,21 +176,156 @@ class InitialState(State):
     def get_highscore_from_database(self):
         return False
     
-    def load_highscores(self):
+    def get_highscores(self):
+        """
+        Try to fetch highscore from the external API. 
+        If successful, compare it with the local highscore. If the local highscore is higher, send it to the server.
+        If the request fails, load highscores from the local file.
+        """
+        try:
+            url = f"{BASE_URL}/measurements/highscore_global"
+            response = requests.post(url)
+
+            if response.status_code == 200:
+                highscores = response.json()
+                if highscores:
+                    latest_database_highscore = float(highscores[0]["alcohol_percentage"])
+
+                    # Load local highscore to compare
+                    local_highscore = self.load_highscores_from_file()
+
+                    if local_highscore["highscore"] > latest_database_highscore:
+                        print(f"Local highscore {local_highscore['highscore']} is higher than database highscore {latest_database_highscore}.")
+                        # Send local highscore to the database
+                        success = self.send_alcohol_level_to_database(local_highscore["highscore"])
+
+                        if success:
+                            print("Local highscore sent to the database.")
+                            # Reload database highscores after sending the local highscore
+                            self.get_highscores()
+                        else:
+                            print("Failed to send local highscore to the database.")
+                    else:
+                        print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
+
+                    # Update the local highscores with the database highscore
+                    self.update_highscores(latest_database_highscore)
+                else:
+                    print("No highscore data available from the server.")
+                    self.load_highscores_from_file()
+
+            else:
+                print(f"Failed to fetch highscore from server. Status code: {response.status_code}")
+                self.load_highscores_from_file()
+
+        except requests.RequestException as e:
+            print(f"Request to fetch highscores failed: {e}")
+            self.load_highscores_from_file()
+
+    def send_alcohol_level_to_database(self, alcohol_level):
+        """
+        Sends the alcohol level to the database.
+        Returns True if successful, False otherwise.
+        """
+        url = f"{BASE_URL}/measurements/add_measurement"
+        payload = {
+            "device_id": 1,  # Example device_id, replace with the actual device ID if needed
+            "alcohol_percentage": alcohol_level,
+            "measurement_date": datetime.now().isoformat()  # Current date and time in ISO format
+        }
+
+        try:
+            response = requests.post(url, json=payload)
+            response_data = response.json()
+            if response.status_code == 201 and 'measurement_id' in response_data:
+                print(f"Measurement added successfully. Measurement ID: {response_data['measurement_id']}")
+                return True
+            elif 'error' in response_data:
+                print(f"Error in measurement submission: {response_data['error']}")
+                return False
+            else:
+                print(f"Failed to send alcohol level to the database. Status code: {response.status_code}")
+                return False
+        except requests.RequestException as e:
+            print(f"Request to send alcohol level failed: {e}")
+            return False
+
+    def update_highscores(self, highscore):
+        """
+        Update highscores in the local file and set alcoWall's highscore variables.
+        Add the date to the highscore data.
+        """
+        current_week = datetime.now().isocalendar()[1]  # Get the current week number
+        current_month = datetime.now().month  # Get the current month number
+        current_date = str(datetime.today())  # Get today's date as string
+
+        # Initialize highscores dictionary
+        highscores = {
+            "weekly_highscore": highscore,
+            "monthly_highscore": highscore,
+            "highscore": highscore,
+            "last_updated_week": current_week,
+            "last_updated_month": current_month,
+            "last_updated_date": current_date  # Add the date to the JSON
+        }
+
+        # Update the alcoWall variables
+        alcoWall.weekly_highscore = highscores["weekly_highscore"]
+        alcoWall.monthly_highscore = highscores["monthly_highscore"]
+        alcoWall.highscore = highscores["highscore"]
+
+        # Write to local JSON file
         highscore_file = "jsonFiles/highscores.json"
-        
+        try:
+            os.makedirs(os.path.dirname(highscore_file), exist_ok=True)
+            with open(highscore_file, "w") as file:
+                json.dump(highscores, file, indent=4)
+            print("Highscores updated and saved to file.")
+        except IOError as e:
+            print(f"An error occurred while writing the highscore file: {e}")
+
+    def load_highscores_from_file(self):
+        """
+        Load highscores from the local JSON file if the server is unavailable.
+        Returns the loaded highscore dictionary.
+        """
+        highscore_file = "jsonFiles/highscores.json"
+
+        # Default structure if the file doesn't exist or is missing keys
         highscores = {
             "weekly_highscore": 0.0,
             "monthly_highscore": 0.0,
-            "highscore": 0.0
+            "highscore": 0.0,
+            "last_updated_week": datetime.now().isocalendar()[1],
+            "last_updated_month": datetime.now().month,
+            "last_updated_date": str(datetime.today())
         }
 
         if os.path.exists(highscore_file):
             try:
                 with open(highscore_file, "r") as file:
-                    highscores = json.load(file)
+                    file_highscores = json.load(file)
+
+                    # Ensure the necessary keys exist, otherwise, fallback to default values
+                    highscores["weekly_highscore"] = file_highscores.get("weekly_highscore", 0.0)
+                    highscores["monthly_highscore"] = file_highscores.get("monthly_highscore", 0.0)
+                    highscores["highscore"] = file_highscores.get("highscore", 0.0)
+                    highscores["last_updated_week"] = file_highscores.get("last_updated_week", datetime.now().isocalendar()[1])
+                    highscores["last_updated_month"] = file_highscores.get("last_updated_month", datetime.now().month)
+                    highscores["last_updated_date"] = file_highscores.get("last_updated_date", str(datetime.today()))
+
+                    # Update the alcoWall variables
+                    alcoWall.weekly_highscore = highscores["weekly_highscore"]
+                    alcoWall.monthly_highscore = highscores["monthly_highscore"]
+                    alcoWall.highscore = highscores["highscore"]
+
+                print("Highscores loaded from local file.")
             except IOError as e:
                 print(f"An error occurred while reading the highscore file: {e}")
+        else:
+            print("Highscore file not found, using default values.")
+
+        return highscores
 
     def get_ad_url(self, device_id):
         url = f"{BASE_URL}/advertisment/get_ad_url"

@@ -4,9 +4,13 @@ from AlcoWall import AlcoWall
 from States.state import State
 import json
 from datetime import datetime
+import requests
 
 alcoWall = AlcoWall()
-COUNTER_FOR_ALCOHOL_MEASURING = 3
+COUNTER_FOR_ALCOHOL_MEASURING = 10
+BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
+DEVICE_ID = 1
+
 
 class AlcoholCheck(State):
     def __init__(self):
@@ -162,14 +166,90 @@ class AlcoholCheck(State):
 
     def write_highscore_to_file(self):
         """
-        @brief Writes the highscore to a JSON file.
+        Writes the highscore to a JSON file. 
+        1. Try to send the alcohol level to the database.
+        2. If successful, try to get the highscore from the database.
+        3. If successful, update the local highscore JSON file with the fetched highscore.
+        4. If any step fails, update the local highscore JSON file only if the current alcohol level is higher than the saved highscore.
         """
         highscore_file = "jsonFiles/highscores.json"
-
+        
         # Ensure the directory exists
         self.ensure_directory_exists("jsonFiles")
-        
-        # Initialize highscores
+
+        # Load existing highscores if the file exists, or initialize if it doesn't
+        highscores = self.load_existing_highscores(highscore_file)
+
+        # Step 1: Try sending alcohol level to the database
+        success = self.send_alcohol_level_to_database(alcoWall.alcohol_level)
+        if success:
+            # Step 2: Try to get highscore from the database
+            database_highscore = self.get_highscore_from_database()
+            if database_highscore is not None:
+                print(f"Highscore retrieved from database: {database_highscore}")
+                # Update highscores with the retrieved highscore
+                self.update_highscores(highscores, database_highscore)
+            else:
+                print("Failed to retrieve highscore from database.")
+                # Step 4: Update local highscore only if current alcohol level is higher
+                self.check_and_update_local_highscore(highscores)
+        else:
+            print("Failed to send alcohol level to database.")
+            # Step 4: Update local highscore only if current alcohol level is higher
+            self.check_and_update_local_highscore(highscores)
+
+        # Step 3/4: Update the local highscore JSON file
+        self.update_local_highscore(highscores, highscore_file)
+
+    def send_alcohol_level_to_database(self, alcohol_level):
+        """
+        Sends the alcohol level to the database.
+        Returns True if successful, False otherwise.
+        """
+        url = f"{BASE_URL}/measurements/add_measurement"
+        payload = {
+            "device_id": 1,  # Example device_id, replace with the actual device ID if needed
+            "alcohol_percentage": alcohol_level,
+            "measurement_date": datetime.now().isoformat()  # Current date and time in ISO format
+        }
+
+        try:
+            response = requests.post(url, json=payload)
+            response_data = response.json()
+            if response.status_code == 201 and 'measurement_id' in response_data:
+                print(f"Measurement added successfully. Measurement ID: {response_data['measurement_id']}")
+                return True
+            elif 'error' in response_data:
+                print(f"Error in measurement submission: {response_data['error']}")
+                return False
+            else:
+                print(f"Failed to send alcohol level to the database. Status code: {response.status_code}")
+                return False
+        except requests.RequestException as e:
+            print(f"Request to send alcohol level failed: {e}")
+            return False
+
+    def get_highscore_from_database(self):
+        """
+        Tries to retrieve the highscore from the database.
+        Returns the highscore value if successful, None otherwise.
+        """
+        url = f"{BASE_URL}/measurements/highscore_global"
+        try:
+            response = requests.post(url)
+            if response.status_code == 200:
+                highscores = response.json()
+                if highscores:
+                    return float(highscores[0]["alcohol_percentage"])
+            return None
+        except requests.RequestException as e:
+            print(f"Error retrieving highscore from the database: {e}")
+            return None
+
+    def load_existing_highscores(self, highscore_file):
+        """
+        Loads the existing highscores from the local JSON file, or initializes a new structure if not found.
+        """
         highscores = {
             "weekly_highscore": 0.0,
             "monthly_highscore": 0.0,
@@ -178,27 +258,19 @@ class AlcoholCheck(State):
             "last_updated_month": datetime.now().month
         }
 
-        # Load existing highscores if the file exists
         if os.path.exists(highscore_file):
             try:
                 with open(highscore_file, "r") as file:
                     highscores = json.load(file)
             except IOError as e:
                 print(f"An error occurred while reading the highscore file: {e}")
+        
+        return highscores
 
-        current_week = datetime.now().isocalendar()[1]
-        current_month = datetime.now().month
-
-        # Reset weekly or monthly highscore if the period has changed
-        if highscores["last_updated_week"] != current_week:
-            highscores["weekly_highscore"] = 0.0
-            highscores["last_updated_week"] = current_week
-
-        if highscores["last_updated_month"] != current_month:
-            highscores["monthly_highscore"] = 0.0
-            highscores["last_updated_month"] = current_month
-
-        # Update highscores if the current alcohol level is higher
+    def check_and_update_local_highscore(self, highscores):
+        """
+        Updates the highscores if the current alcohol level is higher than the locally stored highscore.
+        """
         if alcoWall.alcohol_level > highscores["weekly_highscore"]:
             highscores["weekly_highscore"] = alcoWall.alcohol_level
             alcoWall.weekly_highscore = alcoWall.alcohol_level
@@ -211,13 +283,59 @@ class AlcoholCheck(State):
             highscores["highscore"] = alcoWall.alcohol_level
             alcoWall.highscore = alcoWall.alcohol_level
 
-        # Write updated highscores back to the file
+    def update_highscores(self, highscores, database_highscore):
+        """
+        Updates the highscores dictionary based on the database highscore.
+        """
+        current_week = datetime.now().isocalendar()[1]
+        current_month = datetime.now().month
+
+        # Reset weekly or monthly highscore if the period has changed
+        if highscores["last_updated_week"] != current_week:
+            highscores["weekly_highscore"] = 0.0
+            highscores["last_updated_week"] = current_week
+
+        if highscores["last_updated_month"] != current_month:
+            highscores["monthly_highscore"] = 0.0
+            highscores["last_updated_month"] = current_month
+
+        # Update highscores if the database highscore is higher
+        if database_highscore > highscores["weekly_highscore"]:
+            highscores["weekly_highscore"] = database_highscore
+            alcoWall.weekly_highscore = database_highscore
+
+        if database_highscore > highscores["monthly_highscore"]:
+            highscores["monthly_highscore"] = database_highscore
+            alcoWall.monthly_highscore = database_highscore
+
+        if database_highscore > highscores["highscore"]:
+            highscores["highscore"] = database_highscore
+            alcoWall.highscore = database_highscore
+
+    def update_local_highscore(self, highscores, highscore_file):
+        """
+        Updates the local JSON file with the provided highscores.
+        """
         try:
             with open(highscore_file, "w") as file:
                 json.dump(highscores, file, indent=4)
-            # print("Highscores updated.")
+            print("Highscores updated and saved to local file.")
         except IOError as e:
-            print(f"An error occurred while writing to the highscore file: {e}")
+            print(f"An error occurred while writing the highscore file: {e}")
+
+    def ensure_directory_exists(self, directory):
+        """
+        Ensures that the directory exists, creates it if it doesn't.
+        """
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    def ensure_directory_exists(self, directory):
+        """
+        Ensures that the directory exists, creates it if it doesn't.
+        """
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
     def write_results_to_database(self):
         """
@@ -233,6 +351,7 @@ class AlcoholCheck(State):
         @brief Writes data to the highscore file, JSON file, and database.
         """
         self.write_highscore_to_file()
+        
         self.write_results_to_json_file()
         self.write_results_to_database()
 
