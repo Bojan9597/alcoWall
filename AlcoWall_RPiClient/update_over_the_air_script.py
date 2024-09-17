@@ -47,7 +47,7 @@ def check_for_updates():
     """Check if local repository is up-to-date with the remote main branch."""
     # Ensure we're on the main branch
     current_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
-    print(f"Current branch: {current_branch}")
+    # print(f"Current branch: {current_branch}")
     
     # If not on the main branch, switch to main
     if current_branch != "main":
@@ -92,7 +92,8 @@ def main():
             start_script()
         
         else:
-            print("Repository is up-to-date.")
+            pass
+            # print("Repository is up-to-date.")
         
         time.sleep(10)  # Check every 10 seconds
 

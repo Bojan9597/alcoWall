@@ -66,7 +66,7 @@ class SensorVariableUpdates:
                     content = [line.strip() for line in content]
                 if content != "" and content[0] == "yes":
                     alcoWall.alcohol_level = float(content[1])
-                    print(f"Alcohol level: {alcoWall.alcohol_level}")
+                    # print(f"Alcohol level: {alcoWall.alcohol_level}")
             except FileNotFoundError:
                 pass
 

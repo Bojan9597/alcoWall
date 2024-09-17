@@ -22,7 +22,7 @@ class AlcoWall(QWidget):
         self.weekly_highscore = 0
         self.monthly_highscore = 0
         self.highscore = 0
-        self.device_id = "alcoWall_01"
+        self.device_id = None
 
         self.credit = 0
         self.alcohol_level = -1
@@ -81,7 +81,6 @@ class AlcoWall(QWidget):
         widget.setScaledContents(True)
 
     def change_state(self, state):
-        #print(f"Changed state to {type(state).__name__}")  # Debug print to check state changes
         self.current_state = state
 
     def handle_successful(self):

@@ -43,8 +43,9 @@ class AlcoholChecked(State):
         alcoWall.workingWidget.proximitySensorText.setText("")
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdCounter.setText("")
+        alcoWall.credit = 0 # remove this line
 
-        print("AlcoholChecked: __init__")
+        # print("AlcoholChecked: __init__")
     
     def handle_successful(self):
         """

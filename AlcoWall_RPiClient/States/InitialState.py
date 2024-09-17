@@ -8,6 +8,8 @@ import requests
 from urllib.parse import urlparse
 import subprocess
 BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
+VIDEOS_DIRECTORY = "videos/"
+DEVICE_ID = 1
 
 alcoWall = AlcoWall()
 from States.AlcoholCheck import AlcoholCheck
@@ -29,7 +31,7 @@ class InitialState(State):
         This setup ensures that the system is in a ready state to detect coin insertions and handle state transitions based on user interactions and system status.
         """
         # alcoWall.credit = 0 # Remove this line
-        print("InitialState: __init__")
+        # print("InitialState: __init__")
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()   
@@ -37,8 +39,8 @@ class InitialState(State):
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_next_state)
         self.coin_check_timer.start(1000)  # Check every 1 second
-        self.videos_directory = "videos/"
-        self.device_id = 1
+        self.videos_directory = VIDEOS_DIRECTORY
+        self.device_id = DEVICE_ID
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.play_next_video())
         # Start the first video fetching process
@@ -57,12 +59,12 @@ class InitialState(State):
             if os.path.exists(video_path):
                 # Play the video if it exists
                 alcoWall.video_widget.play_video(video_path)
-                print("Playing existing video..." + video_path)
+                # print("Playing existing video..." + video_path)
                 self.retry_timer.stop()  # Stop retrying
             else:
                 # Download and then play the video
                 self.download_and_play_video(video_url, video_path)
-                print("Downloading and playing video..." + video_path)
+                # print("Downloading and playing video..." + video_path)
                 self.retry_timer.stop()  # Stop retrying
         else:
             print("Failed to retrieve video URL. Retrying...")
@@ -159,7 +161,7 @@ class InitialState(State):
 
         @return InitialState: The current state to remain in.
         """
-        print("InitialState: handle_unsuccessful")
+        # print("InitialState: handle_unsuccessful")
         return self
     
     def handle_error(self):
@@ -214,7 +216,7 @@ class InitialState(State):
         try:
             # print("Checking coin inserted")
             if alcoWall.credit >= 1:
-                print("credit in check_coin_inserted: ", alcoWall.credit)
+                # print("credit in check_coin_inserted: ", alcoWall.credit)
                 alcoWall.handle_successful() 
             else:
                 alcoWall.handle_unsuccessful()
@@ -286,7 +288,6 @@ class InitialState(State):
                         return None
                 else:
                     print(f"Failed to fetch ad URL. Status code: {response.status_code}")
-                    self.video_widget.show_placeholder()
                     return None
             except requests.ConnectionError as e:
                 print(f"Connection error: {e}")
