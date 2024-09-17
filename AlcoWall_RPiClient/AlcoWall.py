@@ -62,18 +62,8 @@ class AlcoWall(QWidget):
         self.backgroundImageLabel.hide()
         self.video_widget.show()
 
-
-        self.retry_timer = QTimer(self)
-        self.retry_timer.timeout.connect(self.retry_load_video)
-        self.retry_interval = 5000
-
         self._initialized = True
         self.current_state = None
-
-    def retry_load_video(self):
-        self.media_player.setSource(QUrl.fromLocalFile('videos/beer1.mp4'))
-        self.backgroundImageLabel.show()
-        self.media_player.play()
 
     def set_background_image(self, widget, image_path):
         pixmap = QPixmap(image_path)

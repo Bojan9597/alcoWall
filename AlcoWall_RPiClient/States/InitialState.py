@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import requests
 from urllib.parse import urlparse
 import subprocess
-BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
+BASE_URL = "https://node.alkowall.indigoingenium.ba1"  # Intentional wrong URL for retry testing
 VIDEOS_DIRECTORY = "videos/"
 DEVICE_ID = 1
 
@@ -30,8 +30,6 @@ class InitialState(State):
 
         This setup ensures that the system is in a ready state to detect coin insertions and handle state transitions based on user interactions and system status.
         """
-        # alcoWall.credit = 0 # Remove this line
-        # print("InitialState: __init__")
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()   
@@ -43,34 +41,26 @@ class InitialState(State):
         self.device_id = DEVICE_ID
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.play_next_video())
-        # Start the first video fetching process
         self.start_fetching_videos()
 
     def play_next_video(self):
-        # Get the video URL
         video_url = self.get_ad_url(self.device_id)
         
         if video_url:
-            # Extract the video filename from the URL
             video_filename = self.extract_filename_from_url(video_url)
             video_path = os.path.join(self.videos_directory, video_filename)
             
-            # Check if the video already exists
             if os.path.exists(video_path):
-                # Play the video if it exists
                 alcoWall.video_widget.play_video(video_path)
-                # print("Playing existing video..." + video_path)
                 self.retry_timer.stop()  # Stop retrying
             else:
-                # Download and then play the video
                 self.download_and_play_video(video_url, video_path)
-                # print("Downloading and playing video..." + video_path)
                 self.retry_timer.stop()  # Stop retrying
         else:
+            alcoWall.video_widget.play_video("videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
 
     def download_and_play_video(self, video_url, save_path):
-        # Download the video from the ad URL
         try:
             response = requests.get(video_url, stream=True)
             if response.status_code == 200:
@@ -81,11 +71,9 @@ class InitialState(State):
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
                 
-                # Check the resolution of the video
                 resolution = self.get_video_resolution(save_path)
                 print(f"Video resolution: {resolution[0]}x{resolution[1]}")
 
-                # If the resolution is not 1024x600, convert it
                 if resolution != (1024, 600):
                     print(f"Converting video to 1024x600 resolution...")
                     self.convert_video_to_resolution(save_path, 1024, 600)
@@ -93,7 +81,6 @@ class InitialState(State):
                 else:
                     print("Video resolution is already 1024x600, no conversion needed.")
 
-                # Play the downloaded (or converted) video
                 alcoWall.video_widget.play_video(save_path)
 
             else:
@@ -131,12 +118,10 @@ class InitialState(State):
             print(f"Error during video conversion: {e}")
     
     def extract_filename_from_url(self, video_url):
-        # Extract the filename from the URL path
         parsed_url = urlparse(video_url)
         return os.path.basename(parsed_url.path)
     
     def start_fetching_videos(self):
-        # Start the retry timer to attempt to fetch a valid URL every 2 seconds
         self.retry_timer.start(1000)  # Retry every 2 seconds
 
     def handle_successful(self):
@@ -161,7 +146,6 @@ class InitialState(State):
 
         @return InitialState: The current state to remain in.
         """
-        # print("InitialState: handle_unsuccessful")
         return self
     
     def handle_error(self):
@@ -173,7 +157,6 @@ class InitialState(State):
 
         @return InitialState: The current state to remain in.
         """
-        print("InitialState: handle_error")
         return InitialState()
     
     def check_next_state(self):
@@ -183,7 +166,6 @@ class InitialState(State):
         This function is called periodically by a timer to determine whether to transition
         to the next state or handle an error.
         """
-        # print("Checking next state")
         if self.check_errors():
             alcoWall.handle_error()
         else:
@@ -214,9 +196,7 @@ class InitialState(State):
         If so, it handles the successful coin insertion. Otherwise, it handles the unsuccessful attempt.
         """
         try:
-            # print("Checking coin inserted")
             if alcoWall.credit >= 1:
-                # print("credit in check_coin_inserted: ", alcoWall.credit)
                 alcoWall.handle_successful() 
             else:
                 alcoWall.handle_unsuccessful()
@@ -242,8 +222,6 @@ class InitialState(State):
 
         @return bool: False if the database is not available.
         """
-        # Get highscores from the database
-        # If the database is not available, return False
         return False
     
     def load_highscores(self):
@@ -257,7 +235,6 @@ class InitialState(State):
         """
         highscore_file = "jsonFiles/highscores.json"
         
-        # Initialize highscores
         highscores = {
             "weekly_highscore": 0.0,
             "monthly_highscore": 0.0,
@@ -272,14 +249,11 @@ class InitialState(State):
                 print(f"An error occurred while reading the highscore file: {e}")
 
     def get_ad_url(self, device_id):
-            # Function to get ad URL
             url = f"{BASE_URL}/advertisment/get_ad_url"
             payload = {"device_id": device_id}
             try:
                 response = requests.post(url, json=payload)
-                # response.status_code = random.choice([200, 404])  # Simulate random status codes
                 if response.status_code == 200:
-                    # Assuming the response JSON has an "ad_url" field
                     ad_url = response.json().get("ad_url")
                     if ad_url:
                         return ad_url
