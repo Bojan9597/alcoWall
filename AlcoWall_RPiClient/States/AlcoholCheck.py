@@ -33,6 +33,8 @@ class AlcoholCheck(State):
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.show()
 
+        self.alcohol_results = []
+
         self.check_proximity_timer = QTimer()
         self.check_proximity_timer.timeout.connect(self.check_proximity)
         self.check_proximity_timer.start(1000)  # Check every 1 second
@@ -164,7 +166,7 @@ class AlcoholCheck(State):
         except IOError as e:
             print(f"An error occurred while writing to the JSON file: {e}")
 
-    def write_highscore_to_file(self):
+    def write_highscore_to_file_and_update_database(self):
         """
         Writes the highscore to a JSON file. 
         1. Try to send the alcohol level to the database.
@@ -181,7 +183,26 @@ class AlcoholCheck(State):
         highscores = self.load_existing_highscores(highscore_file)
 
         # Step 1: Try sending alcohol level to the database
-        success = self.send_alcohol_level_to_database(alcoWall.alcohol_level)
+        success = True
+        self.write_results_to_json_file()
+        with open("jsonFiles/alcohol_results.json", "r") as json_file:
+            for line in json_file:
+                data = json.loads(line)
+                if data["status"] == "success":
+                    alcoWall.alcohol_level = data["alcohol_level"]
+                    self.alcohol_results.append(alcoWall.alcohol_level)
+        
+        for alcohol_level in self.alcohol_results:
+            success = self.send_alcohol_level_to_database(alcohol_level)
+            print(f"Alcohol level: {alcohol_level}, Success: {success}")
+            if not success:
+                success = False
+                break
+            else:
+                self.alcohol_results.remove(alcohol_level)
+                
+        os.remove("jsonFiles/alcohol_results.json")
+
         if success:
             # Step 2: Try to get highscore from the database
             database_highscore = self.get_highscore_from_database()
@@ -337,23 +358,11 @@ class AlcoholCheck(State):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-    def write_results_to_database(self):
-        """
-        @brief Writes the results of the alcohol check to the database.
-        """
-        # Read data from the JSON file and write it to the database
-        # If the database is not available, return False
-        # else write data and delete content of the file
-        return False
-
     def write_data(self):
         """
         @brief Writes data to the highscore file, JSON file, and database.
         """
-        self.write_highscore_to_file()
-        
-        self.write_results_to_json_file()
-        self.write_results_to_database()
+        self.write_highscore_to_file_and_update_database()
 
     def check_elapsed_time(self):
         """
