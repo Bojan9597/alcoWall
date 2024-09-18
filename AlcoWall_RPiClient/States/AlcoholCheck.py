@@ -187,7 +187,7 @@ class AlcoholCheck(State):
         
         for alcohol_level in self.alcohol_results:
             success = self.send_alcohol_level_to_database(alcohol_level)
-            print(f"Alcohol level: {alcohol_level}, Success: {success}")
+            # print(f"Alcohol level: {alcohol_level}, Success: {success}")
             if not success:
                 success = False
                 break
@@ -199,10 +199,10 @@ class AlcoholCheck(State):
         if success:
             database_highscore = self.get_highscore_from_database()
             if database_highscore is not None:
-                print(f"Highscore retrieved from database: {database_highscore}")
+                # print(f"Highscore retrieved from database: {database_highscore}")
                 self.update_highscores(highscores, database_highscore)
             else:
-                print("Failed to retrieve highscore from database.")
+                # print("Failed to retrieve highscore from database.")
                 self.check_and_update_local_highscore(highscores)
         else:
             print("Failed to send alcohol level to database.")
@@ -328,7 +328,7 @@ class AlcoholCheck(State):
         try:
             with open(highscore_file, "w") as file:
                 json.dump(highscores, file, indent=4)
-            print("Highscores updated and saved to local file.")
+            # print("Highscores updated and saved to local file.")
         except IOError as e:
             print(f"An error occurred while writing the highscore file: {e}")
 

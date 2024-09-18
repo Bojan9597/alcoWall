@@ -15,7 +15,7 @@ def read_device_id():
         with open(DEVICE_ID_FILE, 'r') as file:
             return file.read().strip()
     except FileNotFoundError:
-        print(f"Error: {DEVICE_ID_FILE} not found.")
+        # print(f"Error: {DEVICE_ID_FILE} not found.")
         return None
 
 def get_github_branch(device_id):
@@ -27,13 +27,13 @@ def get_github_branch(device_id):
             if "github_branch_name" in data:
                 return data["github_branch_name"]
             elif "message" in data and data["message"] == "Device not found.":
-                print("Device not found.")
+                # print("Device not found.")
                 return None
         else:
-            print(f"Error: Received status code {response.status_code} from server.")
+            # print(f"Error: Received status code {response.status_code} from server.")
             return None
     except requests.RequestException as e:
-        print(f"Error during HTTP request: {e}")
+        # print(f"Error during HTTP request: {e}")
         return None
 
 def is_process_running(script_name):
@@ -86,24 +86,24 @@ def check_for_updates(branch_name):
     
     # Switch to the correct branch if necessary
     if current_branch != branch_name:
-        print(f"Switching to the {branch_name} branch.")
+        # print(f"Switching to the {branch_name} branch.")
         switch_branch_result = subprocess.run(["git", "checkout", branch_name], cwd=REPO_PATH, capture_output=True, text=True)
-        print(f"Switch branch result: {switch_branch_result.stdout}")
+        # print(f"Switch branch result: {switch_branch_result.stdout}")
     
     # Fetch updates from the remote repository
     fetch_result = subprocess.run(["git", "fetch", "--all", "--prune"], cwd=REPO_PATH, capture_output=True, text=True)
-    print(f"Fetch result: {fetch_result.stdout}")
+    # print(f"Fetch result: {fetch_result.stdout}")
 
     # Check the current git status
     git_status = subprocess.run(["git", "status"], cwd=REPO_PATH, capture_output=True, text=True).stdout
-    print(f"Git status: {git_status}")
+    # print(f"Git status: {git_status}")
 
     # Compare the local commit with the remote commit
     local_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
     remote_commit = subprocess.run(["git", "rev-parse", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
 
-    print(f"Local commit: {local_commit}")
-    print(f"Remote commit: {remote_commit}")
+    # print(f"Local commit: {local_commit}")
+    # print(f"Remote commit: {remote_commit}")
     
     return local_commit != remote_commit
 
@@ -111,24 +111,24 @@ def main():
     """Main loop to check for updates every 10 seconds."""
     device_id = read_device_id()
     if not device_id:
-        print("Device ID not found. Exiting.")
+        # print("Device ID not found. Exiting.")
         return
     
     branch_name = get_github_branch(device_id)
     if not branch_name:
-        print("Could not retrieve branch information. Exiting.")
+        # print("Could not retrieve branch information. Exiting.")
         return
     
     start_script()
     
     while True:
         if check_for_updates(branch_name):
-            print(f"Repository is out of sync with remote {branch_name} branch. Updating...")
+            # print(f"Repository is out of sync with remote {branch_name} branch. Updating...")
 
             # Check if the Python script is running
             process = is_process_running(SCRIPT_PATH)
             if process:
-                print(f"Script is running. Stopping process {process.pid}.")
+                # print(f"Script is running. Stopping process {process.pid}.")
                 stop_process(process)
             
             # Update the repository

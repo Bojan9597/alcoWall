@@ -21,7 +21,7 @@ class InitialState(State):
         self.get_highscores()
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_next_state)
-        self.coin_check_timer.start(1000)  # Check every 1 second
+        self.coin_check_timer.start(100)  # Check every 1 second
         self.videos_directory = VIDEOS_DIRECTORY
         self.device_id = DEVICE_ID
         self.retry_timer = QTimer()
@@ -29,14 +29,16 @@ class InitialState(State):
         self.start_fetching_videos()
 
     def play_next_video(self):
+        print("Fetching video...")
         video_url = self.get_ad_url(self.device_id)
         
         if video_url:
             video_filename = self.extract_filename_from_url(video_url)
             video_path = os.path.join(self.videos_directory, video_filename)
-            
+            print(f"Video URL: {video_url}")
             if os.path.exists(video_path):
                 if not self.is_video_corrupted(video_path):
+                    print(f"Playing video: {video_path}")
                     alcoWall.video_widget.play_video(video_path)
                     self.retry_timer.stop()  # Stop retrying
                 else:
@@ -44,6 +46,7 @@ class InitialState(State):
                     os.remove(video_path)
                     self.retry_timer.start(1000)  # Retry fetching a valid video
             else:
+                alcoWall
                 self.download_and_play_video(video_url, video_path)
         else:
             alcoWall.video_widget.play_video("videos/beer1.mp4")
@@ -131,7 +134,7 @@ class InitialState(State):
         return os.path.basename(parsed_url.path)
     
     def start_fetching_videos(self):
-        self.retry_timer.start(1000)  # Retry every 2 seconds
+        self.play_next_video()
 
     def handle_successful(self):
         self.coin_check_timer.stop()
@@ -204,7 +207,8 @@ class InitialState(State):
                         else:
                             print("Failed to send local highscore to the database.")
                     else:
-                        print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
+                        pass
+                        # print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
 
                     # Update the local highscores with the database highscore
                     self.update_highscores(latest_database_highscore)
@@ -278,7 +282,7 @@ class InitialState(State):
             os.makedirs(os.path.dirname(highscore_file), exist_ok=True)
             with open(highscore_file, "w") as file:
                 json.dump(highscores, file, indent=4)
-            print("Highscores updated and saved to file.")
+            # print("Highscores updated and saved to file.")
         except IOError as e:
             print(f"An error occurred while writing the highscore file: {e}")
 
@@ -317,7 +321,7 @@ class InitialState(State):
                     alcoWall.monthly_highscore = highscores["monthly_highscore"]
                     alcoWall.highscore = highscores["highscore"]
 
-                print("Highscores loaded from local file.")
+                # print("Highscores loaded from local file.")
             except IOError as e:
                 print(f"An error occurred while reading the highscore file: {e}")
         else:
