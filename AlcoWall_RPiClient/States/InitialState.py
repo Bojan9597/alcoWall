@@ -196,16 +196,17 @@ class InitialState(State):
                     local_highscore = self.load_highscores_from_file()
 
                     if local_highscore["highscore"] > latest_database_highscore:
-                        print(f"Local highscore {local_highscore['highscore']} is higher than database highscore {latest_database_highscore}.")
+                        # print(f"Local highscore {local_highscore['highscore']} is higher than database highscore {latest_database_highscore}.")
                         # Send local highscore to the database
                         success = self.send_alcohol_level_to_database(local_highscore["highscore"])
 
                         if success:
-                            print("Local highscore sent to the database.")
+                            # print("Local highscore sent to the database.")
                             # Reload database highscores after sending the local highscore
                             self.get_highscores()
                         else:
-                            print("Failed to send local highscore to the database.")
+                            pass
+                            # print("Failed to send local highscore to the database.")
                     else:
                         pass
                         # print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")

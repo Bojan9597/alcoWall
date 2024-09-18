@@ -55,24 +55,24 @@ def stop_process(process):
 
 def update_repository(branch_name):
     """Pull the latest changes from the specified branch."""
-    print(f"Updating repository on branch: {branch_name}...")
+    # print(f"Updating repository on branch: {branch_name}...")
     # Fetch all remotes and branches
     fetch_result = subprocess.run(["git", "fetch", "--all", "--prune"], cwd=REPO_PATH, capture_output=True, text=True)
-    print(f"Fetch result: {fetch_result.stdout}")
+    # print(f"Fetch result: {fetch_result.stdout}")
     
     # Switch to the branch if it's different
     current_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
     
     if current_branch != branch_name:
-        print(f"Switching to branch: {branch_name}")
+        # print(f"Switching to branch: {branch_name}")
         checkout_result = subprocess.run(["git", "checkout", branch_name], cwd=REPO_PATH, capture_output=True, text=True)
-        print(f"Checkout result: {checkout_result.stdout}")
+        # print(f"Checkout result: {checkout_result.stdout}")
     
     # Reset the local repository to match the remote branch
     reset_result = subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
-    print(f"Reset result: {reset_result.stdout}")
+    # print(f"Reset result: {reset_result.stdout}")
     
-    print("Repository updated.")
+    # print("Repository updated.")
 
 def start_script():
     """Start the Python script."""
@@ -104,7 +104,6 @@ def check_for_updates(branch_name):
 
     # print(f"Local commit: {local_commit}")
     # print(f"Remote commit: {remote_commit}")
-    
     return local_commit != remote_commit
 
 def main():
