@@ -3,7 +3,7 @@ from PySide6.QtCore import QTimer
 import json
 import platform
 import threading
-
+from CONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM
 alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
@@ -17,7 +17,7 @@ class SensorVariableUpdates:
 
         # Check if the code is running on Raspberry Pi
         print(platform.machine())
-        if platform.system() == "Linux" and "aarch64" in platform.machine():
+        if platform.system() == TARGET_PLATFORM_SYSTEM and TARGET_PLATFORM_ARCHITECTURE in platform.machine():
             from sensorReadout.DistanceSensor import DistanceSensor
             self.distanceSensor = DistanceSensor()
             self.distanceSensorThread = threading.Thread(target=self.distanceSensor.run, daemon=True)

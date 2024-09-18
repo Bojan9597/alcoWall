@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>mainVideoWidget</class>
- <widget class="QWidget" name="mainVideoWidget">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1000</width>
-    <height>600</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
-   <item>
-    <widget class="QWidget" name="backgroundContainer" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QWidget" name="videoContainer" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="backgroundImageLabel">
-        <property name="text">
-         <string>TextLabel</string>
+    <class>mainVideoWidget</class>
+    <widget class="QWidget" name="mainVideoWidget">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1024</width>
+                <height>600</height>
+            </rect>
         </property>
-       </widget>
-      </item>
-     </layout>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+                <widget class="QWidget" name="backgroundContainer" native="true">
+                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                        <item>
+                            <widget class="QWidget" name="videoContainer" native="true">
+                                <layout class="QVBoxLayout" name="verticalLayout_3" />
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QLabel" name="backgroundImageLabel">
+                                <property name="text">
+                                    <string>TextLabel</string>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </widget>
+            </item>
+        </layout>
     </widget>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+    <resources />
+    <connections />
 </ui>

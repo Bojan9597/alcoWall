@@ -6,13 +6,14 @@ from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, Q
 from PySide6.QtWidgets import QLabel, QLCDNumber
 import imageio
 from LCDNumber import LCDNumber
+from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT
 
 class VideoWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setGeometry(0, 0, 1024, 600)
+        self.setGeometry(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
 
         self.last_time = time.time()
 

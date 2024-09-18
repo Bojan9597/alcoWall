@@ -8,10 +8,7 @@ import requests
 from urllib.parse import urlparse
 import subprocess
 from datetime import date
-
-BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
-VIDEOS_DIRECTORY = "videos/"
-DEVICE_ID = 1
+from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, BASE_URL, VIDEOS_DIRECTORY, DEVICE_ID
 
 alcoWall = AlcoWall()
 from States.AlcoholCheck import AlcoholCheck
@@ -58,7 +55,7 @@ class InitialState(State):
             if response.status_code == 200:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 with open(save_path, 'wb') as video_file:
-                    for chunk in response.iter_content(chunk_size=1024):
+                    for chunk in response.iter_content(chunk_size=VIDEO_WIDTH):
                         if chunk:
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
@@ -71,10 +68,10 @@ class InitialState(State):
                     resolution = self.get_video_resolution(save_path)
                     print(f"Video resolution: {resolution[0]}x{resolution[1]}")
                     
-                    if resolution != (1024, 600):
-                        print(f"Converting video to 1024x600 resolution...")
-                        self.convert_video_to_resolution(save_path, 1024, 600)
-                        print(f"Video converted successfully to 1024x600.")
+                    if resolution != (VIDEO_WIDTH, VIDEO_HEIGHT):
+                        print(f"Converting video to VIDEO_WIDTHxVIDEO_HEIGHT resolution...")
+                        self.convert_video_to_resolution(save_path, VIDEO_WIDTH, VIDEO_HEIGHT)
+                        print(f"Video converted successfully to VIDEO_WIDTHxVIDEO_HEIGHT.")
                     alcoWall.video_widget.play_video(save_path)
 
             else:

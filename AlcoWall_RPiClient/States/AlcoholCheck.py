@@ -5,11 +5,8 @@ from States.state import State
 import json
 from datetime import datetime
 import requests
-
+from CONSTANTS import BASE_URL, COUNTER_FOR_ALCOHOL_MEASURING
 alcoWall = AlcoWall()
-COUNTER_FOR_ALCOHOL_MEASURING = 10
-BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
-DEVICE_ID = 1
 
 
 class AlcoholCheck(State):
@@ -176,13 +173,9 @@ class AlcoholCheck(State):
         """
         highscore_file = "jsonFiles/highscores.json"
         
-        # Ensure the directory exists
         self.ensure_directory_exists("jsonFiles")
-
-        # Load existing highscores if the file exists, or initialize if it doesn't
         highscores = self.load_existing_highscores(highscore_file)
 
-        # Step 1: Try sending alcohol level to the database
         success = True
         self.write_results_to_json_file()
         with open("jsonFiles/alcohol_results.json", "r") as json_file:
@@ -204,22 +197,17 @@ class AlcoholCheck(State):
         os.remove("jsonFiles/alcohol_results.json")
 
         if success:
-            # Step 2: Try to get highscore from the database
             database_highscore = self.get_highscore_from_database()
             if database_highscore is not None:
                 print(f"Highscore retrieved from database: {database_highscore}")
-                # Update highscores with the retrieved highscore
                 self.update_highscores(highscores, database_highscore)
             else:
                 print("Failed to retrieve highscore from database.")
-                # Step 4: Update local highscore only if current alcohol level is higher
                 self.check_and_update_local_highscore(highscores)
         else:
             print("Failed to send alcohol level to database.")
-            # Step 4: Update local highscore only if current alcohol level is higher
             self.check_and_update_local_highscore(highscores)
 
-        # Step 3/4: Update the local highscore JSON file
         self.update_local_highscore(highscores, highscore_file)
 
     def send_alcohol_level_to_database(self, alcohol_level):
