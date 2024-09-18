@@ -5,7 +5,7 @@ from States.state import State
 import json
 from datetime import datetime
 import requests
-from CONSTANTS import BASE_URL, COUNTER_FOR_ALCOHOL_MEASURING
+from CONSTANTS import BASE_URL, COUNTER_FOR_ALCOHOL_MEASURING, DEVICE_ID
 alcoWall = AlcoWall()
 
 
@@ -217,7 +217,7 @@ class AlcoholCheck(State):
         """
         url = f"{BASE_URL}/measurements/add_measurement"
         payload = {
-            "device_id": 1,  # Example device_id, replace with the actual device ID if needed
+            "device_id": DEVICE_ID,  # Example device_id, replace with the actual device ID if needed
             "alcohol_percentage": alcohol_level,
             "measurement_date": datetime.now().isoformat()  # Current date and time in ISO format
         }

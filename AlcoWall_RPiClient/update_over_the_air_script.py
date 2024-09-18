@@ -2,11 +2,39 @@ import os
 import time
 import subprocess
 import psutil
-
+import requests
+import json
+from CONSTANTS import *
 # Use the current working directory as the repository path
 REPO_PATH = os.getcwd()
 SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
-GIT_URL = "https://github.com/Bojan9597/alcoWall.git"
+
+def read_device_id():
+    """Read the device ID from the device_id.txt file."""
+    try:
+        with open(DEVICE_ID_FILE, 'r') as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        print(f"Error: {DEVICE_ID_FILE} not found.")
+        return None
+
+def get_github_branch(device_id):
+    """Get the GitHub branch name by making a POST request with the device ID."""
+    try:
+        response = requests.post(BRANCH_API_URL, json={"device_id": device_id})
+        if response.status_code == 200:
+            data = response.json()
+            if "github_branch_name" in data:
+                return data["github_branch_name"]
+            elif "message" in data and data["message"] == "Device not found.":
+                print("Device not found.")
+                return None
+        else:
+            print(f"Error: Received status code {response.status_code} from server.")
+            return None
+    except requests.RequestException as e:
+        print(f"Error during HTTP request: {e}")
+        return None
 
 def is_process_running(script_name):
     """Check if the Python script is currently running."""
@@ -25,15 +53,23 @@ def stop_process(process):
         process.terminate()
         process.wait()
 
-def update_repository():
-    """Pull the latest changes from the main branch."""
-    print("Updating repository...")
+def update_repository(branch_name):
+    """Pull the latest changes from the specified branch."""
+    print(f"Updating repository on branch: {branch_name}...")
     # Fetch all remotes and branches
     fetch_result = subprocess.run(["git", "fetch", "--all", "--prune"], cwd=REPO_PATH, capture_output=True, text=True)
     print(f"Fetch result: {fetch_result.stdout}")
     
-    # Reset the local repository to match the remote main branch
-    reset_result = subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=REPO_PATH, capture_output=True, text=True)
+    # Switch to the branch if it's different
+    current_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
+    
+    if current_branch != branch_name:
+        print(f"Switching to branch: {branch_name}")
+        checkout_result = subprocess.run(["git", "checkout", branch_name], cwd=REPO_PATH, capture_output=True, text=True)
+        print(f"Checkout result: {checkout_result.stdout}")
+    
+    # Reset the local repository to match the remote branch
+    reset_result = subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
     print(f"Reset result: {reset_result.stdout}")
     
     print("Repository updated.")
@@ -43,16 +79,15 @@ def start_script():
     print("Starting script...")
     subprocess.Popen(["python3", SCRIPT_PATH])
 
-def check_for_updates():
-    """Check if local repository is up-to-date with the remote main branch."""
-    # Ensure we're on the main branch
+def check_for_updates(branch_name):
+    """Check if local repository is up-to-date with the remote branch."""
+    # Ensure we're on the correct branch
     current_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
-    # print(f"Current branch: {current_branch}")
     
-    # If not on the main branch, switch to main
-    if current_branch != "main":
-        print("Switching to the main branch.")
-        switch_branch_result = subprocess.run(["git", "checkout", "main"], cwd=REPO_PATH, capture_output=True, text=True)
+    # Switch to the correct branch if necessary
+    if current_branch != branch_name:
+        print(f"Switching to the {branch_name} branch.")
+        switch_branch_result = subprocess.run(["git", "checkout", branch_name], cwd=REPO_PATH, capture_output=True, text=True)
         print(f"Switch branch result: {switch_branch_result.stdout}")
     
     # Fetch updates from the remote repository
@@ -65,7 +100,7 @@ def check_for_updates():
 
     # Compare the local commit with the remote commit
     local_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
-    remote_commit = subprocess.run(["git", "rev-parse", "origin/main"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
+    remote_commit = subprocess.run(["git", "rev-parse", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True).stdout.strip()
 
     print(f"Local commit: {local_commit}")
     print(f"Remote commit: {remote_commit}")
@@ -74,10 +109,21 @@ def check_for_updates():
 
 def main():
     """Main loop to check for updates every 10 seconds."""
+    device_id = read_device_id()
+    if not device_id:
+        print("Device ID not found. Exiting.")
+        return
+    
+    branch_name = get_github_branch(device_id)
+    if not branch_name:
+        print("Could not retrieve branch information. Exiting.")
+        return
+    
     start_script()
+    
     while True:
-        if check_for_updates():
-            print("Repository is out of sync with remote. Updating...")
+        if check_for_updates(branch_name):
+            print(f"Repository is out of sync with remote {branch_name} branch. Updating...")
 
             # Check if the Python script is running
             process = is_process_running(SCRIPT_PATH)
@@ -86,14 +132,13 @@ def main():
                 stop_process(process)
             
             # Update the repository
-            update_repository()
+            update_repository(branch_name)
 
             # Start the script again
             start_script()
         
         else:
             pass
-            # print("Repository is up-to-date.")
         
         time.sleep(10)  # Check every 10 seconds
 

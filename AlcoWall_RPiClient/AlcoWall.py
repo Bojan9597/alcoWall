@@ -5,6 +5,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
 from VideoWidget import VideoWidget
+from CONSTANTS import DEVICE_ID_FILE
 
 class AlcoWall(QWidget):
     _instance = None
@@ -22,7 +23,7 @@ class AlcoWall(QWidget):
         self.weekly_highscore = 0
         self.monthly_highscore = 0
         self.highscore = 0
-        self.device_id = None
+        self.device_id = self.read_device_id()
 
         self.credit = 0
         self.alcohol_level = -1
@@ -64,6 +65,15 @@ class AlcoWall(QWidget):
 
         self._initialized = True
         self.current_state = None
+    
+    def read_device_id(self):
+        """Read the device ID from the device_id.txt file."""
+        try:
+            with open(DEVICE_ID_FILE, 'r') as file:
+                return file.read().strip()
+        except FileNotFoundError:
+            print(f"Error: {DEVICE_ID_FILE} not found.")
+            return None
 
     def set_background_image(self, widget, image_path):
         pixmap = QPixmap(image_path)

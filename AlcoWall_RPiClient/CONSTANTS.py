@@ -6,3 +6,6 @@ DEVICE_ID = 1
 VIDEOS_DIRECTORY = "videos/"
 TARGET_PLATFORM_SYSTEM = "linux"
 TARGET_PLATFORM_ARCHITECTURE = "x86_644" # Intentional wrong architecture for retry testing x86_64 is real
+GIT_URL = "https://github.com/Bojan9597/alcoWall.git"
+BRANCH_API_URL = "https://node.alkowall.indigoingenium.ba/status/get_github_branch"
+DEVICE_ID_FILE = "device_id.txt"

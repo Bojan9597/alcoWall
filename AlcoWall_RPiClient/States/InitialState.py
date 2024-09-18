@@ -61,6 +61,7 @@ class InitialState(State):
                 print(f"Video downloaded successfully and saved to {save_path}")
                 
                 if self.is_video_corrupted(save_path):
+                    
                     print(f"Downloaded video is corrupted, deleting: {save_path}")
                     os.remove(save_path)
                     alcoWall.video_widget.play_video("videos/beer1.mp4")
