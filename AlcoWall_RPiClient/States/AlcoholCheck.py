@@ -146,10 +146,11 @@ class AlcoholCheck(State):
         """
         @brief Writes the results of the alcohol check to a JSON file.
         """
+        timestamp = datetime.now().isoformat()
         data = {
             "device_id": alcoWall.device_id,
             "alcohol_level": alcoWall.alcohol_level,
-            "status": "success" if alcoWall.alcohol_level else "failure"
+            "datetime": timestamp
         }
 
         # Ensure the directory exists
@@ -178,31 +179,38 @@ class AlcoholCheck(State):
 
         success = True
         self.write_results_to_json_file()
+        
+        # Load alcohol results
         with open("jsonFiles/alcohol_results.json", "r") as json_file:
             for line in json_file:
                 data = json.loads(line)
-                if data["status"] == "success":
-                    alcoWall.alcohol_level = data["alcohol_level"]
-                    self.alcohol_results.append(alcoWall.alcohol_level)
+                # Store device_id, alcohol_level, and timestamp
+                alcoWall.alcohol_level = data["alcohol_level"]
+                self.alcohol_results.append({
+                    "device_id": DEVICE_ID,
+                    "alcohol_level": data["alcohol_level"],
+                    "datetime": data["datetime"]
+                })
         
-        for alcohol_level in self.alcohol_results:
-            success = self.send_alcohol_level_to_database(alcohol_level)
-            # print(f"Alcohol level: {alcohol_level}, Success: {success}")
+        # Try sending results to the database
+        for result in list(self.alcohol_results):  # Use a copy to modify the list while iterating
+            success = self.send_alcohol_level_to_database(result)
             if not success:
-                success = False
-                break
+                break  # Stop sending on failure
             else:
-                self.alcohol_results.remove(alcohol_level)
+                self.alcohol_results.remove(result)  # Remove this specific result from the list
                 
-        os.remove("jsonFiles/alcohol_results.json")
-
+        if os.path.exists("jsonFiles/alcohol_results.json"):
+            with open("jsonFiles/alcohol_results.json", "w") as json_file:
+                for result in self.alcohol_results:
+                    json.dump(result, json_file)
+                    json_file.write("\n")
+    
         if success:
             database_highscore = self.get_highscore_from_database()
             if database_highscore is not None:
-                # print(f"Highscore retrieved from database: {database_highscore}")
                 self.update_highscores(highscores, database_highscore)
             else:
-                # print("Failed to retrieve highscore from database.")
                 self.check_and_update_local_highscore(highscores)
         else:
             print("Failed to send alcohol level to database.")
@@ -210,16 +218,17 @@ class AlcoholCheck(State):
 
         self.update_local_highscore(highscores, highscore_file)
 
-    def send_alcohol_level_to_database(self, alcohol_level):
+
+    def send_alcohol_level_to_database(self, result):
         """
         Sends the alcohol level to the database.
         Returns True if successful, False otherwise.
         """
         url = f"{BASE_URL}/measurements/add_measurement"
         payload = {
-            "device_id": DEVICE_ID,  # Example device_id, replace with the actual device ID if needed
-            "alcohol_percentage": alcohol_level,
-            "measurement_date": datetime.now().isoformat()  # Current date and time in ISO format
+            "device_id": result["device_id"],
+            "alcohol_percentage": result["alcohol_level"],
+            "measurement_date": result["datetime"]  # Use the datetime from the result
         }
 
         try:
@@ -237,6 +246,7 @@ class AlcoholCheck(State):
         except requests.RequestException as e:
             print(f"Request to send alcohol level failed: {e}")
             return False
+
 
     def get_highscore_from_database(self):
         """

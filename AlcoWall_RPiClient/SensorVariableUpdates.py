@@ -101,21 +101,17 @@ class SensorVariableUpdates:
         """Try sending the coin insertions to the server."""
         if not self.coin_insertions:
             return  # No coin insertions to send
-        for coin_insertion in self.coin_insertions:
-            print("---------------")
-            print(f"Coin insertion: {coin_insertion}")
-
         try:
             response = requests.post("https://node.alkowall.indigoingenium.ba/cash/add_cash_multiple", json=self.coin_insertions)
             if response.status_code == 200:
                 response_data = response.json()
                 if response_data.get("message") == "Cash status updated successfully for multiple devices.":
-                    # print("Successfully sent all coin insertions to the server.")
                     self.coin_insertions.clear()  # Clear the list after successful sending
                 else:
                     print(f"Unexpected response from the server: {response_data}")
             else:
                 print(f"Failed to send coin insertions. Status code: {response.status_code}")
         except requests.RequestException as e:
-            print(f"Error while sending coin insertions: {e}")
+            pass
+            # print(f"Error while sending coin insertions: {e}")
 

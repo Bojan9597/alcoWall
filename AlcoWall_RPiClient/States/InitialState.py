@@ -346,5 +346,5 @@ class InitialState(State):
                 print(f"Failed to fetch ad URL. Status code: {response.status_code}")
                 return None
         except requests.ConnectionError as e:
-            print(f"Connection error: {e}")
+            # print(f"Connection error: {e}")
             return None
