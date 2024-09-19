@@ -33,6 +33,8 @@ class AlcoWall(QWidget):
         self.coins_door_open = False
         self.coin_stuck = False
         
+        self.alcohol_level_to_show = 0
+
         # Load the UI file
         loader = QUiLoader()
         file = QFile("UIFiles/VideoWidget.ui")

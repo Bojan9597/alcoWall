@@ -1,6 +1,7 @@
 VIDEO_WIDTH = 1024
 VIDEO_HEIGHT = 600
-COUNTER_FOR_ALCOHOL_MEASURING = 1
+COUNTER_FOR_ALCOHOL_MEASURING = 10
+ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK = 100
 BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
 DEVICE_ID = 1
 VIDEOS_DIRECTORY = "videos/"
@@ -9,3 +10,5 @@ TARGET_PLATFORM_ARCHITECTURE = "x86_644" # Intentional wrong architecture for re
 GIT_URL = "https://github.com/Bojan9597/alcoWall.git"
 BRANCH_API_URL = "https://node.alkowall.indigoingenium.ba/status/get_github_branch"
 DEVICE_ID_FILE = "device_id.txt"
+ALCOHOL_LEVEL_ALLOWED_ERROR = 0.1
+TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN = 10

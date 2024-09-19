@@ -5,7 +5,7 @@ from States.state import State
 import json
 from datetime import datetime
 import requests
-from CONSTANTS import BASE_URL, COUNTER_FOR_ALCOHOL_MEASURING, DEVICE_ID
+from CONSTANTS import BASE_URL, COUNTER_FOR_ALCOHOL_MEASURING, DEVICE_ID, ALCOHOL_LEVEL_ALLOWED_ERROR, ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK
 alcoWall = AlcoWall()
 
 
@@ -47,7 +47,8 @@ class AlcoholCheck(State):
         alcoWall.workingWidget.lcdNumber.setValue(0)
         alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
 
-        self.alcohol_local_maximum = 0
+        self.alcohol_local_starting_value = alcoWall.alcohol_level
+        self.alcohol_local_maximum = float(alcoWall.alcohol_level)
         self.alcohol_local_maximum_updated = False
 
         self.alcohol_local_maximum_timer = QTimer()
@@ -133,9 +134,9 @@ class AlcoholCheck(State):
         """
         try:
             if self.counterForMeasuring < 1:
-                if self.alcohol_local_maximum > 0.1 and not self.alcohol_local_maximum_updated:
+                if alcoWall.alcohol_level_to_show > 0.1 and not self.alcohol_local_maximum_updated:
                     alcoWall.handle_successful()
-                elif self.alcohol_local_maximum <= 0.1:
+                elif alcoWall.alcohol_level_to_show <= 0.1:
                     alcoWall.handle_successful()
             else:
                 alcoWall.workingWidget.alcoholSensorText.setText("Blow into the alcohol \n sensor until the beep")
@@ -149,7 +150,7 @@ class AlcoholCheck(State):
         timestamp = datetime.now().isoformat()
         data = {
             "device_id": alcoWall.device_id,
-            "alcohol_level": alcoWall.alcohol_level,
+            "alcohol_level": alcoWall.alcohol_level_to_show,
             "datetime": timestamp
         }
 
@@ -367,7 +368,7 @@ class AlcoholCheck(State):
         @brief Checks the elapsed time since the start of the alcohol check.
         """
         elapsed = self.start_time.secsTo(QDateTime.currentDateTime())
-        if elapsed >= 20:  # 20 seconds
+        if elapsed >= ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK:  # 20 seconds
             alcoWall.handle_error()
 
     def check_local_maximum(self):
@@ -379,4 +380,6 @@ class AlcoholCheck(State):
             self.alcohol_local_maximum_updated = True
         else:
             self.alcohol_local_maximum_updated = False
-        alcoWall.workingWidget.lcdNumber.setValue(self.alcohol_local_maximum)
+        if self.alcohol_local_maximum - self.alcohol_local_starting_value > ALCOHOL_LEVEL_ALLOWED_ERROR:
+            alcoWall.alcohol_level_to_show = self.alcohol_local_maximum - self.alcohol_local_starting_value
+        alcoWall.workingWidget.lcdNumber.setValue(alcoWall.alcohol_level_to_show)
