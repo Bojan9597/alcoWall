@@ -3,6 +3,8 @@ from PySide6.QtCore import QTimer
 import json
 import platform
 import threading
+import requests
+from datetime import datetime
 from CONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM
 alcoWall = AlcoWall()
 
@@ -14,6 +16,7 @@ class SensorVariableUpdates:
         self.distanceSensor = None
         self.alcoholSensor = None
         self.coinAcceptor = None
+        self.coin_insertions = []
 
         # Check if the code is running on Raspberry Pi
         print(platform.machine())
@@ -34,19 +37,23 @@ class SensorVariableUpdates:
             self.coinAcceptor = None
 
     def check_variable_updates(self):
-        # If running on Raspberry Pi, use CoinAcceptor
+        # Handling coin acceptor
         if self.coinAcceptor:
-            alcoWall.credit += self.coinAcceptor.credit
-            self.coinAcceptor.credit = 0
+            if self.coinAcceptor.credit > 0:
+                self.record_coin_insertion(self.coinAcceptor.credit)
+                alcoWall.credit += self.coinAcceptor.credit
+                self.coinAcceptor.credit = 0
         else:
-            # If not running on Raspberry Pi, read from the file
             try:
                 with open("testFiles/coinInserted.txt", "r") as file:
                     content = file.read().strip()
-                if content != "":
-                    alcoWall.credit += float(content)  # Assuming the file contains credit amount
+                if content != "" and content != "0":
+                    self.record_coin_insertion(float(content))
+                    alcoWall.credit += float(content)
             except FileNotFoundError:
                 pass
+
+        # Handling other sensors
         if self.distanceSensor:
             alcoWall.proximity_distance = self.distanceSensor.distance
         else:
@@ -66,10 +73,10 @@ class SensorVariableUpdates:
                     content = [line.strip() for line in content]
                 if content != "" and content[0] == "yes":
                     alcoWall.alcohol_level = float(content[1])
-                    # print(f"Alcohol level: {alcoWall.alcohol_level}")
             except FileNotFoundError:
                 pass
 
+        # Checking errors
         try:
             with open("jsonFiles/errors.json", "r") as file:
                 error_data = json.load(file)
@@ -78,4 +85,37 @@ class SensorVariableUpdates:
                 alcoWall.coin_stuck = error_data["coin_stuck"]
         except FileNotFoundError:
             pass
+
+        # Try sending unsent coin insertions to the server
+        self.send_coin_insertions()
+    
+    def record_coin_insertion(self, credit):
+        """Record a coin insertion with the current timestamp."""
+        self.coin_insertions.append({
+            "device_id": 1,  # Replace with actual device ID if needed
+            "cash_value": credit,
+            "date": datetime.now().isoformat()  # Use current timestamp
+        })
+
+    def send_coin_insertions(self):
+        """Try sending the coin insertions to the server."""
+        if not self.coin_insertions:
+            return  # No coin insertions to send
+        for coin_insertion in self.coin_insertions:
+            print("---------------")
+            print(f"Coin insertion: {coin_insertion}")
+
+        try:
+            response = requests.post("https://node.alkowall.indigoingenium.ba/cash/add_cash_multiple", json=self.coin_insertions)
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get("message") == "Cash status updated successfully for multiple devices.":
+                    # print("Successfully sent all coin insertions to the server.")
+                    self.coin_insertions.clear()  # Clear the list after successful sending
+                else:
+                    print(f"Unexpected response from the server: {response_data}")
+            else:
+                print(f"Failed to send coin insertions. Status code: {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Error while sending coin insertions: {e}")
 
