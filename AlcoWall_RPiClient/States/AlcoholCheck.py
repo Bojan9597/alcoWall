@@ -48,7 +48,7 @@ class AlcoholCheck(State):
         alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
 
         self.alcohol_local_starting_value = alcoWall.alcohol_level
-        self.alcohol_local_maximum = float(alcoWall.alcohol_level)
+        self.alcohol_local_maximum = alcoWall.alcohol_level
         self.alcohol_local_maximum_updated = False
 
         self.alcohol_local_maximum_timer = QTimer()
@@ -186,7 +186,6 @@ class AlcoholCheck(State):
             for line in json_file:
                 data = json.loads(line)
                 # Store device_id, alcohol_level, and timestamp
-                alcoWall.alcohol_level = data["alcohol_level"]
                 self.alcohol_results.append({
                     "device_id": DEVICE_ID,
                     "alcohol_level": data["alcohol_level"],
@@ -291,17 +290,17 @@ class AlcoholCheck(State):
         """
         Updates the highscores if the current alcohol level is higher than the locally stored highscore.
         """
-        if alcoWall.alcohol_level > highscores["weekly_highscore"]:
-            highscores["weekly_highscore"] = alcoWall.alcohol_level
-            alcoWall.weekly_highscore = alcoWall.alcohol_level
+        if alcoWall.alcohol_level_to_show > highscores["weekly_highscore"]:
+            highscores["weekly_highscore"] = alcoWall.alcohol_level_to_show
+            alcoWall.weekly_highscore = alcoWall.alcohol_level_to_show
 
-        if alcoWall.alcohol_level > highscores["monthly_highscore"]:
-            highscores["monthly_highscore"] = alcoWall.alcohol_level
-            alcoWall.monthly_highscore = alcoWall.alcohol_level
+        if alcoWall.alcohol_level_to_show > highscores["monthly_highscore"]:
+            highscores["monthly_highscore"] = alcoWall.alcohol_level_to_show
+            alcoWall.monthly_highscore = alcoWall.alcohol_level_to_show
 
-        if alcoWall.alcohol_level > highscores["highscore"]:
-            highscores["highscore"] = alcoWall.alcohol_level
-            alcoWall.highscore = alcoWall.alcohol_level
+        if alcoWall.alcohol_level_to_show > highscores["highscore"]:
+            highscores["highscore"] = alcoWall.alcohol_level_to_show
+            alcoWall.highscore = alcoWall.alcohol_level_to_show
 
     def update_highscores(self, highscores, database_highscore):
         """
