@@ -5,7 +5,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
 from VideoWidget import VideoWidget
-from CONSTANTS import DEVICE_ID_FILE
+from CONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES
 import threading
 
 class AlcoWall(QWidget):
@@ -55,6 +55,8 @@ class AlcoWall(QWidget):
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
         self.workingWidget = VideoWidget(self)
+        half_width = PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES * self.workingWidget.proximitySensorText.parent().width()
+        self.workingWidget.proximitySensorText.setFixedWidth(half_width) 
         self.main_videos_widget.layout().addWidget(self.workingWidget)
 
         layout = video_container.layout()

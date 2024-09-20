@@ -156,8 +156,6 @@ class SensorVariableUpdates:
                 response_data = response.json()
                 if response_data.get("message") == "Cash status updated successfully for multiple devices.":
                     success = True
-                    print("Coin insertions sent successfully.")
-                    print(self.coin_insertions)
                     self.coin_insertions.clear()  # Clear the list after successful sending
 
                 else:
@@ -169,7 +167,6 @@ class SensorVariableUpdates:
         except requests.RequestException as e:
             success = False
             return success
-        print("Coin insertions sent successfully.")
         return success
         
             # print(f"Error while sending coin insertions: {e}")

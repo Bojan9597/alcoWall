@@ -2,43 +2,24 @@ import os
 from PySide6.QtCore import QTimer, Qt
 from AlcoWall import AlcoWall
 from States.state import State
-import json
+import requests
 from datetime import datetime, timedelta
 from CONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN
-# from InitialState import InitialState
-
+from PySide6.QtGui import QFontMetrics, QFont
 alcoWall = AlcoWall()
 
 class AlcoholChecked(State):
     def __init__(self):
         """
-        @brief Initializes the AlcoholChecked state.
-
-        This constructor sets up the AlcoholChecked state by hiding unnecessary UI elements,
-        showing the working widget, setting up a timer for state transition, and displaying the
-        detected alcohol level.
-
-        Detailed Steps:
-        1. Hide the video widget to remove distractions from the alcohol check results.
-        2. Hide the background image label for a clean display.
-        3. Show the working widget to display the results.
-        4. Initialize `alcohol_checked_timer` to a QTimer object.
-        5. Connect the `timeout` signal of `alcohol_checked_timer` to the `check_next_state` method. 
-           This means that `check_next_state` will be called every time the timer times out.
-        6. Start the `alcohol_checked_timer` with a timeout interval of 5000 milliseconds (5 seconds).
-        7. Clear the text of label1 and label2 of the working widget.
-        8. Set the text of label3 to display "Alcohol level: ".
-        9. Display the current alcohol level on the LCD number display of the working widget.
-
-        This setup ensures that the alcohol level is displayed to the user for a certain period
-        before transitioning back to the initial state.
+        Initializes the AlcoholChecked state, hides unnecessary UI elements,
+        and sets up a timer for transitioning back to the initial state.
         """
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.show()   
         self.alcohol_checked_timer = QTimer()
         self.alcohol_checked_timer.timeout.connect(self.check_next_state)
-        self.alcohol_checked_timer.start(TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN*1000)  # Check every 5 seconds
+        self.alcohol_checked_timer.start(TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN * 1000)  # Check every 5 seconds
         alcoWall.workingWidget.lcdNumber.setValue(alcoWall.alcohol_level_to_show)
         alcoWall.alcohol_level_to_show = 0
         alcoWall.update_alcohol_level(-1)
@@ -46,14 +27,72 @@ class AlcoholChecked(State):
         alcoWall.workingWidget.proximitySensorText.setText("")
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdCounter.setText("")
-    
+        alcoWall.workingWidget.alcoholSensorText.hide()
+        
+        # Call function to get fun fact and display it
+        self.get_fun_fact()
+
+    def get_fun_fact(self):
+        """
+        Fetches a fun fact from the API and displays it on the proximitySensorText widget with dynamic font size adjustment.
+        If fetching fails, it will display a default fun fact.
+        """
+        fallback_fact = ("Tokom prohibicije u Sjedinjenim Državama, ljudi su pili \"lekovitu\" viskiju "
+                        "koju su im lekari prepisivali kao način da legalno dođu do alkohola.")
+
+        try:
+            response = requests.post("https://node.alkowall.indigoingenium.ba/facts/general_fact")
+            if response.status_code == 200:
+                fact_data = response.json()
+                
+                # Check if fact_data is a list, then access the first element
+                if isinstance(fact_data, list) and len(fact_data) > 0:
+                    fact_sentence = fact_data[0].get("sentence", fallback_fact)
+                elif isinstance(fact_data, dict):
+                    fact_sentence = fact_data.get("sentence", fallback_fact)
+                else:
+                    fact_sentence = fallback_fact
+
+                # Update the proximitySensorText with the received fun fact
+                alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
+
+                # Set the fun fact text with font adjustment to fit within half the label width
+                self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
+
+            else:
+                # If there's an error, set the default fallback fun fact
+                alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
+        except requests.RequestException as e:
+            # In case of network error, display the fallback fun fact
+            alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
+
+    def adjust_font_size_to_fit_half_width(self, label, text):
+        """
+        Adjusts the font size of the label dynamically so that the text fits within half of the label's width.
+        """
+        label.setText(text)
+        font = label.font()
+        font_metrics = QFontMetrics(font)
+        
+        # Start with a large font size and decrease if necessary
+        font_size = 30  # Start with a default large size
+        label.setFont(font)
+
+        # Reduce the font size until the text fits within half of the label's width
+        half_width = label.width() // 2
+        while font_metrics.horizontalAdvance(text) > half_width or font_metrics.boundingRect(0, 0, half_width, label.height(), Qt.TextWordWrap, text).height() > label.height():
+            font_size -= 1
+            font.setPointSize(font_size)
+            label.setFont(font)
+            font_metrics = QFontMetrics(font)
+        
+        # Set the final adjusted font
+        label.setFont(font)
+
+
     def handle_successful(self):
         """
-        @brief Handles the successful transition after displaying the alcohol level.
-
-        This function stops the alcohol checked timer and transitions back to the InitialState.
-
-        @return InitialState: The next state to transition to.
+        Handles the successful transition after displaying the alcohol level.
         """
         self.alcohol_checked_timer.stop()
         from States.InitialState import InitialState
@@ -61,22 +100,14 @@ class AlcoholChecked(State):
 
     def handle_unsuccessful(self):
         """
-        @brief Handles the unsuccessful attempt to transition from the AlcoholChecked state.
-
-        This function prints an error message indicating that the alcohol level insertion failed.
-        
-        @return AlcoholChecked: The current state to remain in.
+        Handles the unsuccessful attempt to transition from the AlcoholChecked state.
         """
         print("Alcohol level insertion failed")
         return self
 
     def handle_error(self):
         """
-        @brief Handles errors during the AlcoholChecked state.
-
-        This function stops the alcohol checked timer and transitions back to the InitialState.
-
-        @return InitialState: The next state to transition to.
+        Handles errors during the AlcoholChecked state.
         """
         self.alcohol_checked_timer.stop()
         from States.InitialState import InitialState
@@ -84,25 +115,16 @@ class AlcoholChecked(State):
 
     def check_next_state(self):
         """
-        @brief Checks for errors and proceeds to transition states if no errors are found.
-
-        This function is called periodically by a timer to determine whether to transition
-        to the next state or handle an error.
+        Checks for errors and proceeds to transition states if no errors are found.
         """
         if self.check_errors():
             alcoWall.handle_error()
         else:
-            alcoWall.credit = 0 # remove this line
             alcoWall.handle_successful()
 
     def check_errors(self):
         """
-        @brief Checks for any errors such as open service or coin doors, or coin stuck.
-
-        This function checks various error conditions that might prevent the process
-        from continuing.
-
-        @return bool: True if any error is detected, False otherwise.
+        Checks for any errors such as open service or coin doors, or coin stuck.
         """
         try:
             if alcoWall.service_door_open or alcoWall.coins_door_open or alcoWall.coin_stuck:

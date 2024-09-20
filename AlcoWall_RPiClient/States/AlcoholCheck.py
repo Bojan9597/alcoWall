@@ -40,6 +40,8 @@ class AlcoholCheck(State):
         self.counterTimer.timeout.connect(self.decreaseCounter)
         self.counterTimer.start(1000)
 
+        alcoWall.workingWidget.alcoholSensorText.hide()
+
         # print("AlcoholCheck: __init__")
         alcoWall.workingWidget.alcoholSensorText.setText("Blow into the alcohol \n sensor until the beep")
         alcoWall.workingWidget.proximitySensorText.setText("")
@@ -55,6 +57,7 @@ class AlcoholCheck(State):
         self.alcohol_local_maximum_timer.timeout.connect(self.check_local_maximum)
         self.alcohol_local_maximum_timer.start(300)  # Check every 300 milliseconds
         alcoWall.workingWidget.play_video('videos/beer1.mp4')
+
 
     def ensure_directory_exists(self, directory):
         """

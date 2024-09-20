@@ -15,6 +15,7 @@ from States.AlcoholCheck import AlcoholCheck
 
 class InitialState(State):
     def __init__(self):
+        alcoWall.set_credit(0)
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()   
