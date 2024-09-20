@@ -67,6 +67,10 @@ class AlcoWall(QWidget):
 
         self._initialized = True
         self.current_state = None
+
+    def update_credit(self, credit):
+        with self.lock:
+            self.credit = credit
     
     def read_device_id(self):
         """Read the device ID from the device_id.txt file."""

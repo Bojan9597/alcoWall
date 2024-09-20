@@ -1,40 +1,52 @@
-from AlcoWall import AlcoWall
-from PySide6.QtCore import QTimer
-import json
 import platform
+import json
 import threading
 import requests
 from datetime import datetime
+from PySide6.QtCore import QTimer
+from AlcoWall import AlcoWall
 from CONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM
+
 alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
     def __init__(self):
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_variable_updates)
-        self.coin_check_timer.start(1000)
+        self.coin_check_timer.start(100)
         self.distanceSensor = None
         self.alcoholSensor = None
         self.coinAcceptor = None
         self.coin_insertions = []
 
+        # Start a new thread to handle sensor updates and network requests
+        self.thread = threading.Thread(target=self.run_sensor_updates, daemon=True)
+        self.thread.start()
+
         # Check if the code is running on Raspberry Pi
-        print(platform.machine())
         if platform.system() == TARGET_PLATFORM_SYSTEM and TARGET_PLATFORM_ARCHITECTURE in platform.machine():
             from sensorReadout.DistanceSensor import DistanceSensor
             self.distanceSensor = DistanceSensor()
             self.distanceSensorThread = threading.Thread(target=self.distanceSensor.run, daemon=True)
             self.distanceSensorThread.start()
+
             from sensorReadout.AlcoholSensor import AlcoholSensor
             self.alcoholSensor = AlcoholSensor()
             self.alcoholSensorThread = threading.Thread(target=self.alcoholSensor.run, daemon=True)
             self.alcoholSensorThread.start()
+
             from sensorReadout.CoinAcceptor import CoinAcceptor
             self.coinAcceptor = CoinAcceptor()
             self.coin_thread = threading.Thread(target=self.coinAcceptor.run, daemon=True)
             self.coin_thread.start()
-        else:
-            self.coinAcceptor = None
+
+    def run_sensor_updates(self):
+        """Separate thread for checking sensor updates and sending data."""
+        while True:
+            self.check_variable_updates()
+            self.send_coin_insertions()
+            # Sleep to reduce CPU usage (this can be tweaked)
+            threading.Event().wait(5)
 
     def check_variable_updates(self):
         # Handling coin acceptor
@@ -86,9 +98,6 @@ class SensorVariableUpdates:
         except FileNotFoundError:
             pass
 
-        # Try sending unsent coin insertions to the server
-        self.send_coin_insertions()
-    
     def record_coin_insertion(self, credit):
         """Record a coin insertion with the current timestamp."""
         self.coin_insertions.append({
@@ -101,6 +110,7 @@ class SensorVariableUpdates:
         """Try sending the coin insertions to the server."""
         if not self.coin_insertions:
             return  # No coin insertions to send
+
         try:
             response = requests.post("https://node.alkowall.indigoingenium.ba/cash/add_cash_multiple", json=self.coin_insertions)
             if response.status_code == 200:
@@ -114,4 +124,3 @@ class SensorVariableUpdates:
         except requests.RequestException as e:
             pass
             # print(f"Error while sending coin insertions: {e}")
-
