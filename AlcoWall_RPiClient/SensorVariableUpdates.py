@@ -13,7 +13,7 @@ class SensorVariableUpdates:
     def __init__(self):
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_variable_updates)
-        self.coin_check_timer.start(100)
+        self.coin_check_timer.start(10)
         self.distanceSensor = None
         self.alcoholSensor = None
         self.coinAcceptor = None
@@ -53,7 +53,7 @@ class SensorVariableUpdates:
         if self.coinAcceptor:
             if self.coinAcceptor.credit > 0:
                 self.record_coin_insertion(self.coinAcceptor.credit)
-                alcoWall.credit += self.coinAcceptor.credit
+                alcoWall.update_credit(self.coinAcceptor.credit)
                 self.coinAcceptor.credit = 0
         else:
             try:
@@ -61,30 +61,30 @@ class SensorVariableUpdates:
                     content = file.read().strip()
                 if content != "" and content != "0":
                     self.record_coin_insertion(float(content))
-                    alcoWall.credit += float(content)
+                    alcoWall.update_credit(float(content))
             except FileNotFoundError:
                 pass
 
         # Handling other sensors
         if self.distanceSensor:
-            alcoWall.proximity_distance = self.distanceSensor.distance
+            alcoWall.update_proximity_distance(self.distanceSensor.distance)
         else:
             try:
                 with open("testFiles/proximityCheck.txt", "r") as file:
                     content = file.read().strip()
                 if content != "":
-                    alcoWall.proximity_distance = int(content)
+                    alcoWall.update_proximity_distance(int(content))
             except FileNotFoundError:
                 pass
         if self.alcoholSensor:
-            alcoWall.alcohol_level = self.alcoholSensor.alcohol_level
+            alcoWall.update_alcohol_level(self.alcoholSensor.alcohol_level)
         else:
             try:
                 with open("testFiles/alcoholCheck.txt", "r") as file:
                     content = file.readlines()
                     content = [line.strip() for line in content]
                 if content != "" and content[0] == "yes":
-                    alcoWall.alcohol_level = float(content[1])
+                    alcoWall.update_alcohol_level(float(content[1]))
             except FileNotFoundError:
                 pass
 

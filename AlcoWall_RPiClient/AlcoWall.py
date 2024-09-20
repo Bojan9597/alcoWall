@@ -6,6 +6,7 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
 from VideoWidget import VideoWidget
 from CONSTANTS import DEVICE_ID_FILE
+import threading
 
 class AlcoWall(QWidget):
     _instance = None
@@ -19,7 +20,6 @@ class AlcoWall(QWidget):
         if hasattr(self, '_initialized') and self._initialized:
             return
         super().__init__()
-        self.credit = 0
         self.weekly_highscore = 0
         self.monthly_highscore = 0
         self.highscore = 0
@@ -68,10 +68,34 @@ class AlcoWall(QWidget):
         self._initialized = True
         self.current_state = None
 
+
     def update_credit(self, credit):
-        with self.lock:
-            self.credit = credit
+        """Update the credit value. but thread safe."""
+        with threading.Lock():
+            self.credit += credit  
     
+    def get_credit(self):
+        """Get the current credit value."""
+        return self.credit
+    
+    def update_alcohol_level(self, alcohol_level):
+        """Update the alcohol level. but thread safe."""
+        with threading.Lock():
+            self.alcohol_level = alcohol_level
+    
+    def get_alcohol_level(self):
+        """Get the current alcohol level."""
+        return self.alcohol_level
+    
+    def update_proximity_distance(self, proximity_distance):
+        """Update the proximity distance. but thread safe."""
+        with threading.Lock():
+            self.proximity_distance = proximity_distance
+
+    def get_proximity_distance(self):
+        """Get the current proximity distance."""
+        return self.proximity_distance
+
     def read_device_id(self):
         """Read the device ID from the device_id.txt file."""
         try:

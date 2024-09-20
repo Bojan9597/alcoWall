@@ -163,7 +163,7 @@ class InitialState(State):
 
     def check_coin_inserted(self):
         try:
-            if alcoWall.credit >= 1:
+            if alcoWall.get_credit() >= 1:
                 alcoWall.handle_successful() 
             else:
                 alcoWall.handle_unsuccessful()

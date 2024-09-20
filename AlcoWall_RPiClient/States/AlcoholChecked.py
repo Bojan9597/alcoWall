@@ -41,14 +41,11 @@ class AlcoholChecked(State):
         self.alcohol_checked_timer.start(TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN*1000)  # Check every 5 seconds
         alcoWall.workingWidget.lcdNumber.setValue(alcoWall.alcohol_level_to_show)
         alcoWall.alcohol_level_to_show = 0
-        alcoWall.alcohol_level = -1
+        alcoWall.update_alcohol_level(-1)
         alcoWall.workingWidget.alcoholSensorText.setText("")
         alcoWall.workingWidget.proximitySensorText.setText("")
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdCounter.setText("")
-        alcoWall.credit = 0 # remove this line
-
-        # print("AlcoholChecked: __init__")
     
     def handle_successful(self):
         """

@@ -18,7 +18,7 @@ class AlcoholCheck(State):
         initializes variables, and configures the user interface elements for the alcohol check process.
         """
         self.start_time = QDateTime.currentDateTime()
-        alcoWall.credit -= 1
+        alcoWall.update_credit(-1)
 
         self.elapsed_timer = QTimer()
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)
@@ -47,8 +47,8 @@ class AlcoholCheck(State):
         alcoWall.workingWidget.lcdNumber.setValue(0)
         alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
 
-        self.alcohol_local_starting_value = alcoWall.alcohol_level
-        self.alcohol_local_maximum = alcoWall.alcohol_level
+        self.alcohol_local_starting_value = alcoWall.get_alcohol_level()
+        self.alcohol_local_maximum = alcoWall.get_alcohol_level()
         self.alcohol_local_maximum_updated = False
 
         self.alcohol_local_maximum_timer = QTimer()
@@ -121,7 +121,7 @@ class AlcoholCheck(State):
         @brief Checks the proximity of the user to ensure they are close enough for a precise measurement.
         """
         try:
-            if alcoWall.proximity_distance < 20 and alcoWall.proximity_distance >= 0:
+            if alcoWall.get_proximity_distance() < 20 and alcoWall.get_proximity_distance() >= 0:
                 alcoWall.workingWidget.proximitySensorText.setText("")
             else:
                 alcoWall.workingWidget.proximitySensorText.setText("Come closer for a \nprecise measurement")
@@ -374,8 +374,8 @@ class AlcoholCheck(State):
         """
         @brief Checks and updates the local maximum alcohol level detected.
         """
-        if alcoWall.alcohol_level > self.alcohol_local_maximum:
-            self.alcohol_local_maximum = max(self.alcohol_local_maximum, alcoWall.alcohol_level)
+        if alcoWall.get_alcohol_level() > self.alcohol_local_maximum:
+            self.alcohol_local_maximum = max(self.alcohol_local_maximum, alcoWall.get_alcohol_level())
             self.alcohol_local_maximum_updated = True
         else:
             self.alcohol_local_maximum_updated = False
