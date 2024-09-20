@@ -2,13 +2,14 @@ from PySide6.QtWidgets import QLCDNumber, QApplication
 from PySide6.QtGui import QPainter, QColor, QFont
 from PySide6.QtCore import Qt
 import sys
+from ComponentsConstants.LCDNumberConstants import *
 
 class LCDNumber(QLCDNumber):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setDigitCount(5)  # Adjust the number of digits as needed (including decimal point and two decimals)
-        self.setFixedHeight(200)
-        self.setFixedWidth(300)
+        self.setDigitCount(DIGIT_COUNT)
+        self.setFixedHeight(WIDGET_HEIGHT)
+        self.setFixedWidth(WIDGET_WIDTH)
         self.setStyleSheet("border: none;")
         self.value = 0.0
 
@@ -26,19 +27,19 @@ class LCDNumber(QLCDNumber):
         rect = self.rect()
 
         # Determine the color based on the value
-        if self.value < 0.3:
-            color = QColor(0, 255, 0)  # Green
-        elif 0.3 <= self.value <= 0.8:
-            color = QColor(255, 165, 0)  # Orange
+        if self.value < LOW_THRESHOLD:
+            color = COLOR_GREEN
+        elif LOW_THRESHOLD <= self.value <= HIGH_THRESHOLD:
+            color = COLOR_ORANGE
         else:
-            color = QColor(255, 0, 0)  # Red
+            color = COLOR_RED
 
         # Set the color for the text
         painter.setPen(color)
 
         # Adjust font size to fit the widget
         font = painter.font()
-        font.setPointSize(100)  # Adjust this size to fit the display area
+        font.setPointSize(FONT_SIZE)  # Use the constant font size
         painter.setFont(font)
 
         # Draw the number centered with two decimal places

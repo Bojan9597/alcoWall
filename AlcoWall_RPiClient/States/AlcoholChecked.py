@@ -4,7 +4,7 @@ from AlcoWall import AlcoWall
 from States.state import State
 import json
 from datetime import datetime, timedelta
-from CONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN
+from ComponentsConstants import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN
 # from InitialState import InitialState
 
 alcoWall = AlcoWall()
