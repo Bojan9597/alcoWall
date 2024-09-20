@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import subprocess
 from datetime import date
 from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, BASE_URL, VIDEOS_DIRECTORY, DEVICE_ID
-
+from PySide6.QtCore import Slot
 alcoWall = AlcoWall()
 from States.AlcoholCheck import AlcoholCheck
 
@@ -28,6 +28,13 @@ class InitialState(State):
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.play_next_video)
         self.start_fetching_videos()
+        alcoWall.video_widget.video_finished.connect(self.video_finished_handler)
+        
+
+    @Slot()
+    def video_finished_handler(self):
+        print("Video finished.")
+        self.play_next_video()
 
     def play_next_video(self):
         print("Fetching video...")

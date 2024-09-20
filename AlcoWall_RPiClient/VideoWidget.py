@@ -7,11 +7,12 @@ from PySide6.QtWidgets import QLabel, QLCDNumber
 import imageio
 from LCDNumber import LCDNumber
 from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT
+from PySide6.QtCore import Signal
 
 class VideoWidget(QWidget):
+    video_finished = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
-        
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setGeometry(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
 
@@ -59,6 +60,7 @@ class VideoWidget(QWidget):
             frame = self.cap.get_next_data()
         except IndexError:
             # If the video has ended, reset the frame position to loop
+            self.video_finished.emit()
             self.cap.set_image_index(0)  # Reset to the first frame
             frame = self.cap.get_next_data()
 
