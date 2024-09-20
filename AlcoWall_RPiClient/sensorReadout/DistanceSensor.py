@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 
 class DistanceSensor:
     def __init__(self):
@@ -39,15 +40,25 @@ class DistanceSensor:
         pulse_duration = pulse_end - pulse_start
 
         # Calculate distance (speed of sound is approximately 343 meters per second)
-        distance = pulse_duration * 17150  # (34300 cm/s / 2)
+        self.set_distance(round(pulse_duration * 17150,2))
 
-        return round(distance, 2)
+    def get_distance(self):
+        """Returns the last measured distance."""
+        with threading.Lock():
+            return self.distance
+    def set_distance(self, distance):
+        """Sets the distance value."""
+        with threading.Lock():
+            self.distance = distance
+    def update_distance(self):
+        """Updates the distance value."""
+        self.distance = self.measure_distance()
 
     def run(self, interval=1):
         """Continuously measures and prints the distance."""
         try:
             while True:
-                self.distance = self.measure_distance()
+                self.measure_distance()
                 # print(f"Distance: {self.distance} cm")
                 time.sleep(interval)
         except KeyboardInterrupt:

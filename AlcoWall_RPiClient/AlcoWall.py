@@ -77,6 +77,11 @@ class AlcoWall(QWidget):
     def get_credit(self):
         """Get the current credit value."""
         return self.credit
+
+    def set_credit(self, credit):
+        """Set the credit value. but thread safe."""
+        with threading.Lock():
+            self.credit = credit
     
     def update_alcohol_level(self, alcohol_level):
         """Update the alcohol level. but thread safe."""
@@ -86,6 +91,11 @@ class AlcoWall(QWidget):
     def get_alcohol_level(self):
         """Get the current alcohol level."""
         return self.alcohol_level
+
+    def set_alcohol_level(self, alcohol_level):
+        """Set the alcohol level. but thread safe."""
+        with threading.Lock():
+            self.alcohol_level = alcohol_level
     
     def update_proximity_distance(self, proximity_distance):
         """Update the proximity distance. but thread safe."""
@@ -95,6 +105,11 @@ class AlcoWall(QWidget):
     def get_proximity_distance(self):
         """Get the current proximity distance."""
         return self.proximity_distance
+    
+    def set_proximity_distance(self, proximity_distance):
+        """Set the proximity distance. but thread safe."""
+        with threading.Lock():
+            self.proximity_distance = proximity_distance
 
     def read_device_id(self):
         """Read the device ID from the device_id.txt file."""

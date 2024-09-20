@@ -1,5 +1,6 @@
 import time
 import RPi.GPIO as GPIO
+import threading
 
 class CoinAcceptor:
     def __init__(self, input_pin=17):
@@ -11,7 +12,7 @@ class CoinAcceptor:
         # Setup GPIO
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.input_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self.input_pin, GPIO.RISING, callback=self.coin_detected, bouncetime=20)
+        GPIO.add_event_detect(self.input_pin, GPIO.RISING, callback=self.coin_detected, bouncetime=5)
 
     def coin_detected(self, channel):
         current_time = time.time()
@@ -22,15 +23,27 @@ class CoinAcceptor:
 
     def check_credits(self):
         if self.pulse_count == 1:
-            self.credit += 0.5
+            self.update_credit(0.5)
             print("added 0.5 coins")
         elif self.pulse_count == 5:
-            self.credit += 1
+            self.update_credit(1)
             print(f"Added 1 credit")
         elif self.pulse_count == 10:
-            self.credit += 2
+            self.update_credit(2)
             print(f"Added 2 credits.")
         self.pulse_count = 0  # Reset pulse count after updating credits
+    
+    def get_credit(self):
+        with threading.Lock():
+            return self.credit
+        
+    def update_credit(self, credit):
+        with threading.Lock():
+            self.credit += credit
+
+    def set_credit(self, credit):
+        with threading.Lock():
+            self.credit = credit
 
     def run(self):
         try:
@@ -44,6 +57,8 @@ class CoinAcceptor:
 
     def cleanup(self):
         GPIO.cleanup()  # Clean up GPIO on normal exit
+
+
 
 # Usage
 if __name__ == "__main__":

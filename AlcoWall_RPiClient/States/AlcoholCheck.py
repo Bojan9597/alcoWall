@@ -18,7 +18,7 @@ class AlcoholCheck(State):
         initializes variables, and configures the user interface elements for the alcohol check process.
         """
         self.start_time = QDateTime.currentDateTime()
-        alcoWall.update_credit(-1)
+        alcoWall.set_credit(-1)
 
         self.elapsed_timer = QTimer()
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)

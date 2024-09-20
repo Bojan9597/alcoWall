@@ -11,9 +11,9 @@ alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
     def __init__(self):
-        self.coin_check_timer = QTimer()
-        self.coin_check_timer.timeout.connect(self.check_variable_updates)
-        self.coin_check_timer.start(10)
+        # self.coin_check_timer = QTimer()
+        # self.coin_check_timer.timeout.connect(self.check_variable_updates)
+        # self.coin_check_timer.start(1000)
         self.distanceSensor = None
         self.alcoholSensor = None
         self.coinAcceptor = None
@@ -44,30 +44,29 @@ class SensorVariableUpdates:
         """Separate thread for checking sensor updates and sending data."""
         while True:
             self.check_variable_updates()
-            self.send_coin_insertions()
-            # Sleep to reduce CPU usage (this can be tweaked)
-            threading.Event().wait(5)
+            threading.Event().wait(0.2)
 
     def check_variable_updates(self):
         # Handling coin acceptor
         if self.coinAcceptor:
-            if self.coinAcceptor.credit > 0:
-                self.record_coin_insertion(self.coinAcceptor.credit)
-                alcoWall.update_credit(self.coinAcceptor.credit)
-                self.coinAcceptor.credit = 0
+            if self.coinAcceptor.get_credit() > 0:
+                self.record_coin_insertion(self.coinAcceptor.get_credit())
+                alcoWall.update_credit(self.coinAcceptor.get_credit())
+                self.coinAcceptor.set_credit(0)
         else:
             try:
                 with open("testFiles/coinInserted.txt", "r") as file:
                     content = file.read().strip()
                 if content != "" and content != "0":
                     self.record_coin_insertion(float(content))
+                    self.send_coin_insertions()
                     alcoWall.update_credit(float(content))
             except FileNotFoundError:
                 pass
 
         # Handling other sensors
         if self.distanceSensor:
-            alcoWall.update_proximity_distance(self.distanceSensor.distance)
+            alcoWall.update_proximity_distance(self.distanceSensor.get_distance())
         else:
             try:
                 with open("testFiles/proximityCheck.txt", "r") as file:
@@ -77,7 +76,7 @@ class SensorVariableUpdates:
             except FileNotFoundError:
                 pass
         if self.alcoholSensor:
-            alcoWall.update_alcohol_level(self.alcoholSensor.alcohol_level)
+            alcoWall.update_alcohol_level(self.alcoholSensor.get_alcohol_level())
         else:
             try:
                 with open("testFiles/alcoholCheck.txt", "r") as file:
@@ -110,6 +109,7 @@ class SensorVariableUpdates:
         """Try sending the coin insertions to the server."""
         if not self.coin_insertions:
             return  # No coin insertions to send
+        print(f"Sending coin insertions: {self.coin_insertions}")
 
         try:
             response = requests.post("https://node.alkowall.indigoingenium.ba/cash/add_cash_multiple", json=self.coin_insertions)
