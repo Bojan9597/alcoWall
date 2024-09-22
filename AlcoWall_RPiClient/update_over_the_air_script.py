@@ -5,7 +5,7 @@ import psutil
 import requests
 import json
 from CONSTANTS import *
-
+#test
 # Use the current working directory as the repository path
 REPO_PATH = os.getcwd()
 SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
