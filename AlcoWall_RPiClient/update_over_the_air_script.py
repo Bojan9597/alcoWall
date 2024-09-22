@@ -10,6 +10,8 @@ from CONSTANTS import *
 REPO_PATH = os.getcwd()
 SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
 
+# Path to the virtual environment's Python interpreter
+VENV_PYTHON = "/home/bojan/Desktop/envForAlcoWall/bin/python3"
 
 def read_device_id():
     """Read the device ID from the device_id.txt file."""
@@ -18,7 +20,6 @@ def read_device_id():
             return file.read().strip()
     except FileNotFoundError:
         return None
-
 
 def get_github_branch(device_id):
     """Get the GitHub branch name by making a POST request with the device ID."""
@@ -31,7 +32,6 @@ def get_github_branch(device_id):
     except requests.RequestException:
         return None
 
-
 def is_process_running(script_name):
     """Check if the Python script is currently running."""
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
@@ -42,13 +42,11 @@ def is_process_running(script_name):
             pass
     return None
 
-
 def stop_process(process):
     """Terminate the given process."""
     if process:
         process.terminate()
         process.wait()
-
 
 def update_repository(branch_name):
     """Pull the latest changes from the specified branch."""
@@ -61,11 +59,9 @@ def update_repository(branch_name):
     
     subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
 
-
 def start_script():
-    """Start the Python script."""
-    subprocess.Popen(["python3", SCRIPT_PATH])
-
+    """Start the Python script using the virtual environment's Python interpreter."""
+    subprocess.Popen([VENV_PYTHON, SCRIPT_PATH])
 
 def check_for_updates(branch_name):
     """Check if local repository is up-to-date with the remote branch."""
@@ -81,7 +77,6 @@ def check_for_updates(branch_name):
 
     return local_commit != remote_commit
 
-
 def internet_is_available():
     """Check if the internet connection is available by pinging a known server."""
     try:
@@ -89,7 +84,6 @@ def internet_is_available():
         return True
     except requests.ConnectionError:
         return False
-
 
 def main():
     """Main loop to check for updates while ensuring the script runs even without internet."""
@@ -128,7 +122,6 @@ def main():
             print("No internet connection. Retrying in 10 seconds.")
 
         time.sleep(10)
-
 
 if __name__ == "__main__":
     main()
