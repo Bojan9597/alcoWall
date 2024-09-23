@@ -63,12 +63,12 @@ class AlcoholChecked(State):
                 # If there's an error, set the default fallback fun fact
                 alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
                 alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
-                self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
+                self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fallback_fact)
         except requests.RequestException as e:
             # In case of network error, display the fallback fun fact
             alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
             alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
-            self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
+            self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fallback_fact)
 
     def adjust_font_size_to_fit_half_width(self, label, text):
         """

@@ -1,35 +1,38 @@
+# InitialState.py
+
 import os
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QTimer, Qt, Slot
 from AlcoWall import AlcoWall
 from States.state import State
-import json
-from datetime import datetime, timedelta
 import requests
 from urllib.parse import urlparse
 import subprocess
-from datetime import date
-from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, BASE_URL, VIDEOS_DIRECTORY, DEVICE_ID
-from PySide6.QtCore import Slot
-alcoWall = AlcoWall()
+from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, VIDEOS_DIRECTORY, DEVICE_ID
+from DataManager import DataManager
 from States.AlcoholCheck import AlcoholCheck
+
+alcoWall = AlcoWall()
 
 class InitialState(State):
     def __init__(self):
         alcoWall.set_credit(0)
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
-        alcoWall.workingWidget.hide()   
+        alcoWall.workingWidget.hide()
+
+        self.device_id = DEVICE_ID
+        self.data_manager = DataManager(self.device_id)
         self.get_highscores()
+
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_next_state)
-        self.coin_check_timer.start(100)  # Check every 1 second
+        self.coin_check_timer.start(100)  # Check every 100 milliseconds
+
         self.videos_directory = VIDEOS_DIRECTORY
-        self.device_id = DEVICE_ID
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.play_next_video)
         self.start_fetching_videos()
         alcoWall.video_widget.video_finished.connect(self.video_finished_handler)
-        
 
     @Slot()
     def video_finished_handler(self):
@@ -38,8 +41,8 @@ class InitialState(State):
 
     def play_next_video(self):
         print("Fetching video...")
-        video_url = self.get_ad_url(self.device_id)
-        
+        video_url = self.data_manager.get_ad_url()
+
         if video_url:
             video_filename = self.extract_filename_from_url(video_url)
             video_path = os.path.join(self.videos_directory, video_filename)
@@ -54,7 +57,6 @@ class InitialState(State):
                     os.remove(video_path)
                     self.retry_timer.start(1000)  # Retry fetching a valid video
             else:
-                alcoWall
                 self.download_and_play_video(video_url, video_path)
         else:
             alcoWall.video_widget.play_video("videos/beer1.mp4")
@@ -66,24 +68,23 @@ class InitialState(State):
             if response.status_code == 200:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 with open(save_path, 'wb') as video_file:
-                    for chunk in response.iter_content(chunk_size=VIDEO_WIDTH):
+                    for chunk in response.iter_content(chunk_size=1024):
                         if chunk:
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
-                
+
                 if self.is_video_corrupted(save_path):
-                    
                     print(f"Downloaded video is corrupted, deleting: {save_path}")
                     os.remove(save_path)
                     alcoWall.video_widget.play_video("videos/beer1.mp4")
                 else:
                     resolution = self.get_video_resolution(save_path)
                     print(f"Video resolution: {resolution[0]}x{resolution[1]}")
-                    
+
                     if resolution != (VIDEO_WIDTH, VIDEO_HEIGHT):
-                        print(f"Converting video to VIDEO_WIDTHxVIDEO_HEIGHT resolution...")
+                        print(f"Converting video to {VIDEO_WIDTH}x{VIDEO_HEIGHT} resolution...")
                         self.convert_video_to_resolution(save_path, VIDEO_WIDTH, VIDEO_HEIGHT)
-                        print(f"Video converted successfully to VIDEO_WIDTHxVIDEO_HEIGHT.")
+                        print("Video converted successfully.")
                     alcoWall.video_widget.play_video(save_path)
 
             else:
@@ -91,6 +92,7 @@ class InitialState(State):
                 alcoWall.video_widget.play_video("videos/beer1.mp4")
         except requests.ConnectionError as e:
             print(f"Connection error while downloading: {e}")
+            alcoWall.video_widget.play_video("videos/beer1.mp4")
 
     def is_video_corrupted(self, video_path):
         """Check if the video is corrupted using ffmpeg."""
@@ -101,7 +103,7 @@ class InitialState(State):
             )
             # If ffmpeg returns an error, the video is likely corrupted
             if result.returncode != 0:
-                print(f"ffmpeg error: {result.stderr}")
+                print(f"ffmpeg error: {result.stderr.decode()}")
                 return True
             return False
         except Exception as e:
@@ -109,11 +111,11 @@ class InitialState(State):
             return True
 
     def get_video_resolution(self, video_path):
-        """Use ffmpeg to get the resolution of the video."""
+        """Use ffprobe to get the resolution of the video."""
         try:
             result = subprocess.run(
-                ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", 
-                "stream=width,height", "-of", "csv=s=x:p=0", video_path],
+                ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                 "stream=width,height", "-of", "csv=s=x:p=0", video_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True
@@ -136,11 +138,11 @@ class InitialState(State):
             os.replace(temp_path, video_path)
         except subprocess.CalledProcessError as e:
             print(f"Error during video conversion: {e}")
-    
+
     def extract_filename_from_url(self, video_url):
         parsed_url = urlparse(video_url)
         return os.path.basename(parsed_url.path)
-    
+
     def start_fetching_videos(self):
         self.play_next_video()
 
@@ -150,10 +152,10 @@ class InitialState(State):
 
     def handle_unsuccessful(self):
         return self
-    
+
     def handle_error(self):
         return InitialState()
-    
+
     def check_next_state(self):
         if self.check_errors():
             alcoWall.handle_error()
@@ -172,187 +174,51 @@ class InitialState(State):
     def check_coin_inserted(self):
         try:
             if alcoWall.get_credit() >= 1:
-                alcoWall.handle_successful() 
+                alcoWall.handle_successful()
             else:
                 alcoWall.handle_unsuccessful()
         except FileNotFoundError:
             pass
 
     def get_highscores(self):
-        if not self.get_highscore_from_database():
-            self.load_highscores()
-
-    def get_highscore_from_database(self):
-        return False
-    
-    def get_highscores(self):
         """
-        Try to fetch highscore from the external API. 
-        If successful, compare it with the local highscore. If the local highscore is higher, send it to the server.
+        Try to fetch highscore from the external API.
+        If successful, compare it with the local highscore.
+        If the local highscore is higher, send it to the server.
         If the request fails, load highscores from the local file.
         """
-        try:
-            url = f"{BASE_URL}/measurements/highscore_global"
-            response = requests.post(url)
+        latest_database_highscore = self.data_manager.get_highscore_from_database()
 
-            if response.status_code == 200:
-                highscores = response.json()
-                if highscores:
-                    latest_database_highscore = float(highscores[0]["alcohol_percentage"])
+        if latest_database_highscore is not None:
+            # Compare with local highscore
+            local_highscores = self.data_manager.load_highscores_from_file()
 
-                    # Load local highscore to compare
-                    local_highscore = self.load_highscores_from_file()
+            if local_highscores["highscore"] > latest_database_highscore:
+                success = self.data_manager.send_alcohol_level_to_database(
+                    local_highscores["highscore"]
+                )
 
-                    if local_highscore["highscore"] > latest_database_highscore:
-                        # print(f"Local highscore {local_highscore['highscore']} is higher than database highscore {latest_database_highscore}.")
-                        # Send local highscore to the database
-                        success = self.send_alcohol_level_to_database(local_highscore["highscore"])
-
-                        if success:
-                            # print("Local highscore sent to the database.")
-                            # Reload database highscores after sending the local highscore
-                            self.get_highscores()
-                        else:
-                            pass
-                            # print("Failed to send local highscore to the database.")
-                    else:
-                        pass
-                        # print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
-
-                    # Update the local highscores with the database highscore
-                    self.update_highscores(latest_database_highscore)
+                if success:
+                    print("Local highscore sent to the database.")
+                    # Update database highscore
+                    latest_database_highscore = local_highscores["highscore"]
                 else:
-                    print("No highscore data available from the server.")
-                    self.load_highscores_from_file()
-
+                    print("Failed to send local highscore to the database.")
             else:
-                print(f"Failed to fetch highscore from server. Status code: {response.status_code}")
-                self.load_highscores_from_file()
+                print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
 
-        except requests.RequestException as e:
-            print(f"Request to fetch highscores failed: {e}")
-            self.load_highscores_from_file()
+            # Update the local highscores with the database highscore
+            self.data_manager.update_highscores(latest_database_highscore)
 
-    def send_alcohol_level_to_database(self, alcohol_level):
-        """
-        Sends the alcohol level to the database.
-        Returns True if successful, False otherwise.
-        """
-        url = f"{BASE_URL}/measurements/add_measurement"
-        payload = {
-            "device_id": 1,  # Example device_id, replace with the actual device ID if needed
-            "alcohol_percentage": alcohol_level,
-            "measurement_date": datetime.now().isoformat()  # Current date and time in ISO format
-        }
+            # Update alcoWall variables
+            alcoWall.weekly_highscore = latest_database_highscore
+            alcoWall.monthly_highscore = latest_database_highscore
+            alcoWall.highscore = latest_database_highscore
 
-        try:
-            response = requests.post(url, json=payload)
-            response_data = response.json()
-            if response.status_code == 201 and 'measurement_id' in response_data:
-                print(f"Measurement added successfully. Measurement ID: {response_data['measurement_id']}")
-                return True
-            elif 'error' in response_data:
-                print(f"Error in measurement submission: {response_data['error']}")
-                return False
-            else:
-                print(f"Failed to send alcohol level to the database. Status code: {response.status_code}")
-                return False
-        except requests.RequestException as e:
-            print(f"Request to send alcohol level failed: {e}")
-            return False
-
-    def update_highscores(self, highscore):
-        """
-        Update highscores in the local file and set alcoWall's highscore variables.
-        Add the date to the highscore data.
-        """
-        current_week = datetime.now().isocalendar()[1]  # Get the current week number
-        current_month = datetime.now().month  # Get the current month number
-        current_date = str(datetime.today())  # Get today's date as string
-
-        # Initialize highscores dictionary
-        highscores = {
-            "weekly_highscore": highscore,
-            "monthly_highscore": highscore,
-            "highscore": highscore,
-            "last_updated_week": current_week,
-            "last_updated_month": current_month,
-            "last_updated_date": current_date  # Add the date to the JSON
-        }
-
-        # Update the alcoWall variables
-        alcoWall.weekly_highscore = highscores["weekly_highscore"]
-        alcoWall.monthly_highscore = highscores["monthly_highscore"]
-        alcoWall.highscore = highscores["highscore"]
-
-        # Write to local JSON file
-        highscore_file = "jsonFiles/highscores.json"
-        try:
-            os.makedirs(os.path.dirname(highscore_file), exist_ok=True)
-            with open(highscore_file, "w") as file:
-                json.dump(highscores, file, indent=4)
-            # print("Highscores updated and saved to file.")
-        except IOError as e:
-            print(f"An error occurred while writing the highscore file: {e}")
-
-    def load_highscores_from_file(self):
-        """
-        Load highscores from the local JSON file if the server is unavailable.
-        Returns the loaded highscore dictionary.
-        """
-        highscore_file = "jsonFiles/highscores.json"
-
-        # Default structure if the file doesn't exist or is missing keys
-        highscores = {
-            "weekly_highscore": 0.0,
-            "monthly_highscore": 0.0,
-            "highscore": 0.0,
-            "last_updated_week": datetime.now().isocalendar()[1],
-            "last_updated_month": datetime.now().month,
-            "last_updated_date": str(datetime.today())
-        }
-
-        if os.path.exists(highscore_file):
-            try:
-                with open(highscore_file, "r") as file:
-                    file_highscores = json.load(file)
-
-                    # Ensure the necessary keys exist, otherwise, fallback to default values
-                    highscores["weekly_highscore"] = file_highscores.get("weekly_highscore", 0.0)
-                    highscores["monthly_highscore"] = file_highscores.get("monthly_highscore", 0.0)
-                    highscores["highscore"] = file_highscores.get("highscore", 0.0)
-                    highscores["last_updated_week"] = file_highscores.get("last_updated_week", datetime.now().isocalendar()[1])
-                    highscores["last_updated_month"] = file_highscores.get("last_updated_month", datetime.now().month)
-                    highscores["last_updated_date"] = file_highscores.get("last_updated_date", str(datetime.today()))
-
-                    # Update the alcoWall variables
-                    alcoWall.weekly_highscore = highscores["weekly_highscore"]
-                    alcoWall.monthly_highscore = highscores["monthly_highscore"]
-                    alcoWall.highscore = highscores["highscore"]
-
-                # print("Highscores loaded from local file.")
-            except IOError as e:
-                print(f"An error occurred while reading the highscore file: {e}")
         else:
-            print("Highscore file not found, using default values.")
-
-        return highscores
-
-    def get_ad_url(self, device_id):
-        url = f"{BASE_URL}/advertisment/get_ad_url"
-        payload = {"device_id": device_id}
-        try:
-            response = requests.post(url, json=payload)
-            if response.status_code == 200:
-                ad_url = response.json().get("ad_url")
-                if ad_url:
-                    return ad_url
-                else:
-                    print("No ad URL found in the response.")
-                    return None
-            else:
-                print(f"Failed to fetch ad URL. Status code: {response.status_code}")
-                return None
-        except requests.ConnectionError as e:
-            # print(f"Connection error: {e}")
-            return None
+            # Load highscores from the local file if fetching from the database failed
+            local_highscores = self.data_manager.load_highscores_from_file()
+            # Update alcoWall variables with local highscores
+            alcoWall.weekly_highscore = local_highscores["weekly_highscore"]
+            alcoWall.monthly_highscore = local_highscores["monthly_highscore"]
+            alcoWall.highscore = local_highscores["highscore"]

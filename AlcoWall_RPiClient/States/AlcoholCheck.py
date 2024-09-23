@@ -352,13 +352,6 @@ class AlcoholCheck(State):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-    def ensure_directory_exists(self, directory):
-        """
-        Ensures that the directory exists, creates it if it doesn't.
-        """
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
     def write_data(self):
         """
         @brief Writes data to the highscore file, JSON file, and database.
