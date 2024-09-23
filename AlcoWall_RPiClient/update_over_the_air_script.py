@@ -37,7 +37,8 @@ def is_process_running(script_name):
     """Check if the Python script is currently running."""
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
-            if script_name in proc.info['cmdline']:
+            cmdline = proc.info['cmdline']
+            if cmdline and script_name in cmdline:
                 return proc
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -98,13 +99,19 @@ def main():
     if not device_id:
         print("Device ID not found. Exiting.")
         return
-    
+
     # Start the main application script immediately
     start_script()
-    
+
     branch_name = get_github_branch(device_id)
 
     while True:
+        # Check if the main script is running; if not, restart it
+        process = is_process_running(SCRIPT_PATH)
+        if not process:
+            print("Main script is not running. Starting it.")
+            start_script()
+
         if internet_is_available():
             print("Internet connection is available. Checking for updates...")
 
