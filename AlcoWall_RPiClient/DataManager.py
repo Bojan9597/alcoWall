@@ -280,3 +280,31 @@ class DataManager:
         except requests.RequestException as e:
             print(f"Request to fetch ad URL failed: {e}")
             return None
+    
+    def get_fun_fact(self):
+        """
+        Fetches a fun fact from the API.
+        Returns the fun fact string if successful, or a default fun fact on failure.
+        """
+        fallback_fact = ("Tokom prohibicije u Sjedinjenim Državama, ljudi su pili \"lekovitu\" viskiju "
+                         "koju su im lekari prepisivali kao način da legalno dođu do alkohola.")
+        try:
+            response = requests.post("https://node.alkowall.indigoingenium.ba/facts/general_fact")
+            if response.status_code == 200:
+                fact_data = response.json()
+
+                # Check if fact_data is a list or dict
+                if isinstance(fact_data, list) and len(fact_data) > 0:
+                    fact_sentence = fact_data[0].get("sentence", fallback_fact)
+                elif isinstance(fact_data, dict):
+                    fact_sentence = fact_data.get("sentence", fallback_fact)
+                else:
+                    fact_sentence = fallback_fact
+
+                return fact_sentence
+            else:
+                print(f"Failed to fetch fun fact. Status code: {response.status_code}")
+                return fallback_fact
+        except requests.RequestException as e:
+            print(f"Error fetching fun fact: {e}")
+            return fallback_fact

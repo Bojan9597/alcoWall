@@ -1,11 +1,14 @@
+# AlcoholChecked.py
+
 import os
 from PySide6.QtCore import QTimer, Qt
 from AlcoWall import AlcoWall
 from States.state import State
-import requests
 from datetime import datetime, timedelta
-from CONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN
+from CONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN, DEVICE_ID
 from PySide6.QtGui import QFontMetrics, QFont
+from DataManager import DataManager  # Import DataManager
+
 alcoWall = AlcoWall()
 
 class AlcoholChecked(State):
@@ -16,10 +19,10 @@ class AlcoholChecked(State):
         """
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()
-        alcoWall.workingWidget.show()   
+        alcoWall.workingWidget.show()
         self.alcohol_checked_timer = QTimer()
         self.alcohol_checked_timer.timeout.connect(self.check_next_state)
-        self.alcohol_checked_timer.start(TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN * 1000)  # Check every 5 seconds
+        self.alcohol_checked_timer.start(TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN * 1000)  # Convert seconds to milliseconds
         alcoWall.workingWidget.lcdNumber.setValue(alcoWall.alcohol_level_to_show)
         alcoWall.alcohol_level_to_show = 0
         alcoWall.update_alcohol_level(-1)
@@ -28,47 +31,21 @@ class AlcoholChecked(State):
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdCounter.setText("")
         alcoWall.workingWidget.alcoholSensorText.hide()
-        
+
+        # Create an instance of DataManager
+        self.data_manager = DataManager(DEVICE_ID)
         # Call function to get fun fact and display it
         self.get_fun_fact()
 
     def get_fun_fact(self):
         """
-        Fetches a fun fact from the API and displays it on the proximitySensorText widget with dynamic font size adjustment.
-        If fetching fails, it will display a default fun fact.
+        Fetches a fun fact using DataManager and displays it on the proximitySensorText widget with dynamic font size adjustment.
         """
-        fallback_fact = ("Tokom prohibicije u Sjedinjenim Državama, ljudi su pili \"lekovitu\" viskiju "
-                        "koju su im lekari prepisivali kao način da legalno dođu do alkohola.")
+        fact_sentence = self.data_manager.get_fun_fact()
+        alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
 
-        try:
-            response = requests.post("https://node.alkowall.indigoingenium.ba/facts/general_fact")
-            if response.status_code == 200:
-                fact_data = response.json()
-                
-                # Check if fact_data is a list, then access the first element
-                if isinstance(fact_data, list) and len(fact_data) > 0:
-                    fact_sentence = fact_data[0].get("sentence", fallback_fact)
-                elif isinstance(fact_data, dict):
-                    fact_sentence = fact_data.get("sentence", fallback_fact)
-                else:
-                    fact_sentence = fallback_fact
-
-                # Update the proximitySensorText with the received fun fact
-                alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
-
-                # Set the fun fact text with font adjustment to fit within half the label width
-                self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
-
-            else:
-                # If there's an error, set the default fallback fun fact
-                alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
-                alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
-                self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fallback_fact)
-        except requests.RequestException as e:
-            # In case of network error, display the fallback fun fact
-            alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
-            alcoWall.workingWidget.proximitySensorText.setText(fallback_fact)
-            self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fallback_fact)
+        # Set the fun fact text with font adjustment to fit within half the label width
+        self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
 
     def adjust_font_size_to_fit_half_width(self, label, text):
         """
@@ -76,23 +53,22 @@ class AlcoholChecked(State):
         """
         label.setText(text)
         font = label.font()
-        font_metrics = QFontMetrics(font)
-        
-        # Start with a large font size and decrease if necessary
         font_size = 30  # Start with a default large size
+        font.setPointSize(font_size)
         label.setFont(font)
+        font_metrics = QFontMetrics(font)
 
         # Reduce the font size until the text fits within half of the label's width
         half_width = label.width() // 2
-        while font_metrics.horizontalAdvance(text) > half_width or font_metrics.boundingRect(0, 0, half_width, label.height(), Qt.TextWordWrap, text).height() > label.height():
+        while (font_metrics.horizontalAdvance(text) > half_width or
+               font_metrics.boundingRect(0, 0, half_width, label.height(), Qt.TextWordWrap, text).height() > label.height()) and font_size > 5:
             font_size -= 1
             font.setPointSize(font_size)
             label.setFont(font)
             font_metrics = QFontMetrics(font)
-        
+
         # Set the final adjusted font
         label.setFont(font)
-
 
     def handle_successful(self):
         """
