@@ -4,7 +4,7 @@ After=network.target graphical.target
 
 [Service]
 WorkingDirectory=/home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/
-ExecStart=/home/bojan/Desktop/envForAlcoWall/bin/python3  /home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/update_over_the_air_script.py
+ExecStartPre=/home/bojan/Desktop/envForAlcoWall/bin/python3  /home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/update_over_the_air_script.py
 Restart=on-failure
 RestartSec=5
 User=bojan
