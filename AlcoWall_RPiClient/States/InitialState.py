@@ -190,9 +190,10 @@ class InitialState(State):
         latest_database_highscore = self.data_manager.get_highscore_from_database()
 
         if latest_database_highscore is not None:
-            # Compare with local highscore
+            # Load local highscores
             local_highscores = self.data_manager.load_highscores_from_file()
 
+            # Compare with local highscore
             if local_highscores["highscore"] > latest_database_highscore:
                 success = self.data_manager.send_alcohol_level_to_database(
                     local_highscores["highscore"]
@@ -208,12 +209,15 @@ class InitialState(State):
                 print(f"Database highscore is higher or equal: {latest_database_highscore}. No update needed.")
 
             # Update the local highscores with the database highscore
-            self.data_manager.update_highscores(latest_database_highscore)
+            self.data_manager.update_highscores(local_highscores, latest_database_highscore)
+
+            # Save the updated highscores back to the local file
+            self.data_manager.update_local_highscores(local_highscores)
 
             # Update alcoWall variables
-            alcoWall.weekly_highscore = latest_database_highscore
-            alcoWall.monthly_highscore = latest_database_highscore
-            alcoWall.highscore = latest_database_highscore
+            alcoWall.weekly_highscore = local_highscores["weekly_highscore"]
+            alcoWall.monthly_highscore = local_highscores["monthly_highscore"]
+            alcoWall.highscore = local_highscores["highscore"]
 
         else:
             # Load highscores from the local file if fetching from the database failed
@@ -222,3 +226,5 @@ class InitialState(State):
             alcoWall.weekly_highscore = local_highscores["weekly_highscore"]
             alcoWall.monthly_highscore = local_highscores["monthly_highscore"]
             alcoWall.highscore = local_highscores["highscore"]
+
+    # Rest of the class remains unchanged
