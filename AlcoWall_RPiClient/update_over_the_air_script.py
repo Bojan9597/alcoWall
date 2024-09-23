@@ -4,13 +4,14 @@ import subprocess
 import psutil
 import requests
 import json
+import platform  # Import platform module for OS and architecture checks
 from CONSTANTS import *
-#test
+
 # Use the current working directory as the repository path
 REPO_PATH = os.getcwd()
 SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
 
-# Path to the virtual environment's Python interpreter
+# Path to the virtual environment's Python interpreter for Raspberry Pi
 VENV_PYTHON = "/home/bojan/Desktop/envForAlcoWall/bin/python3"
 
 def read_device_id():
@@ -60,8 +61,13 @@ def update_repository(branch_name):
     subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
 
 def start_script():
-    """Start the Python script using the virtual environment's Python interpreter."""
-    subprocess.Popen([VENV_PYTHON, SCRIPT_PATH])
+    """Start the Python script using the appropriate Python interpreter."""
+    if platform.system() == "Linux" and platform.machine() in ("armv7l", "armv6l", "aarch64"):
+        # On Raspberry Pi, use the virtual environment Python interpreter
+        subprocess.Popen([VENV_PYTHON, SCRIPT_PATH])
+    else:
+        # On regular Linux, use the default python3 interpreter
+        subprocess.Popen(["python3", SCRIPT_PATH])
 
 def check_for_updates(branch_name):
     """Check if local repository is up-to-date with the remote branch."""
