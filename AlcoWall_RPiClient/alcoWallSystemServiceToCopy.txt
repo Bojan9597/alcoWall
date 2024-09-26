@@ -1,17 +1,19 @@
 [Unit]
 Description=AlcoWall Raspberry Pi Client OTA Script
-After=network.target graphical.target
 
 [Service]
+User=bojan
+Group=bojan
 WorkingDirectory=/home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/
 
-ExecStart=/home/bojan/Desktop/envForAlcoWall/bin/python3  /home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/update_over_the_air_script.py
+Environment="HOME=/home/bojan"
+Environment="DISPLAY=:0"
+
+ExecStart=/home/bojan/Desktop/envForAlcoWall/bin/python3 /home/bojan/Desktop/al>
+StandardOutput=journal
+StandardError=journal
 Restart=always
 RestartSec=5
-User=bojan
-Environment=PYTHONUNBUFFERED=1
-Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/bojan/.Xauthority
 
-[Install]
-WantedBy=multi-user.target
+StartLimitBurst=10
+StartLimitIntervalSec=30
