@@ -20,6 +20,8 @@ class VideoWidget(QWidget):
 
         self.alcoholSensorText = QLabel("g")
         self.alcoholSensorText.setStyleSheet("color: white; font-size: 40px;")
+        self.funFactText = QLabel()
+        self.funFactText.setStyleSheet("color: white; font-size: 40px;")
         self.resultLabelText = QLabel()
         self.resultLabelText.setStyleSheet("color: white; font-size: 40px;")
         self.lcdCounter = QLabel()
@@ -37,6 +39,7 @@ class VideoWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.addWidget(self.alcoholSensorText)
+        layout.addWidget(self.funFactText)
         layout.addWidget(self.resultLabelText)
         layout.addWidget(self.widget)
         
