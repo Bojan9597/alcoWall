@@ -53,6 +53,8 @@ class AlcoWall(QWidget):
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
         self.workingWidget = VideoWidget(self)
+        half_width = PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES * self.workingWidget.funFactText.parent().width()
+        self.workingWidget.funFactText.setFixedWidth(half_width) 
         self.main_videos_widget.layout().addWidget(self.workingWidget)
 
         layout = video_container.layout()
