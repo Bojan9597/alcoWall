@@ -4,9 +4,9 @@ import threading
 import requests
 from datetime import datetime
 from PySide6.QtCore import QTimer
-from AlcoWall import AlcoWall
+from Components.AlcoWall import AlcoWall
 import os
-from CONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM, DEVICE_ID
+from Constants.GENERALCONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM, DEVICE_ID
 
 alcoWall = AlcoWall()
 
@@ -74,7 +74,7 @@ class SensorVariableUpdates:
 
         # Checking errors
         try:
-            with open("jsonFiles/errors.json", "r") as file:
+            with open("DatabaseManagement/jsonFiles/errors.json", "r") as file:
                 error_data = json.load(file)
                 alcoWall.service_door_open = error_data["service_door_open"]
                 alcoWall.coins_door_open = error_data["coins_door_open"]
@@ -95,7 +95,7 @@ class SensorVariableUpdates:
         self.ensure_directory_exists("jsonFiles")
 
         try:
-            with open("jsonFiles/coinInserted.json", "a") as json_file:
+            with open("DatabaseManagement/jsonFiles/coinInserted.json", "a") as json_file:
                 json.dump(data, json_file)
                 json_file.write("\n")  # Write each entry on a new line
         except IOError as e:
@@ -113,7 +113,7 @@ class SensorVariableUpdates:
         self.coin_insertions.clear()
         self.write_credit_to_json_file(float(credit))
 
-        with open("jsonFiles/coinInserted.json", "r") as json_file:
+        with open("DatabaseManagement/jsonFiles/coinInserted.json", "r") as json_file:
             for line in json_file:
                 data = json.loads(line)
                 # Store device_id, alcohol_level, and timestamp
@@ -125,8 +125,8 @@ class SensorVariableUpdates:
         
         self.send_coin_insertions_to_database(self.coin_insertions)
                 
-        if os.path.exists("jsonFiles/coinInserted.json"):
-            with open("jsonFiles/coinInserted.json", "w") as json_file:
+        if os.path.exists("DatabaseManagement/jsonFiles/coinInserted.json"):
+            with open("DatabaseManagement/jsonFiles/coinInserted.json", "w") as json_file:
                 for credit in self.coin_insertions:
                     json.dump(credit, json_file)
                     json_file.write("\n")

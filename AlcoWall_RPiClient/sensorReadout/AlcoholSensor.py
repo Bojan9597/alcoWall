@@ -4,7 +4,7 @@ import busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import threading
-from ComponentsConstants import ALCOHOL_LEVEL_MEASUREMENT_TIME_INTERVAL
+from Constants.ComponentsConstants import ALCOHOL_LEVEL_MEASUREMENT_TIME_INTERVAL
 
 class AlcoholSensor:
     def __init__(self):

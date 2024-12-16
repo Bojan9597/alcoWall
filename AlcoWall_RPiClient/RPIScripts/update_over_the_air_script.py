@@ -5,7 +5,7 @@ import psutil
 import requests
 import json
 import platform  # Import platform module for OS and architecture checks
-from CONSTANTS import *
+from Constants.GENERALCONSTANTS import *
 
 # Use the current working directory as the repository path
 REPO_PATH = os.getcwd()

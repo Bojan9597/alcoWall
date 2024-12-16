@@ -2,12 +2,12 @@
 
 import os
 from PySide6.QtCore import QTimer, Qt
-from AlcoWall import AlcoWall
+from Components.AlcoWall import AlcoWall
 from States.state import State
 from datetime import datetime, timedelta
-from CONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN, DEVICE_ID
+from Constants.GENERALCONSTANTS import TIME_IN_ALCOHOL_CHECKED_STATE_FOR_ALCOHOL_SENSOR_COOLDOWN, DEVICE_ID
 from PySide6.QtGui import QFontMetrics, QFont
-from DataManager import DataManager  # Import DataManager
+from DatabaseManagement.DataManager import DataManager  # Import DataManager
 
 alcoWall = AlcoWall()
 

@@ -4,8 +4,8 @@ from PySide6.QtCore import QFile, QUrl, Qt, QTimer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtGui import QPixmap
-from VideoWidget import VideoWidget
-from CONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES
+from Components.VideoWidget import VideoWidget
+from Constants.GENERALCONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES
 import threading
 
 class AlcoWall(QWidget):
@@ -49,7 +49,7 @@ class AlcoWall(QWidget):
         self.video_widget.alcoholSensorText.hide()
         self.video_widget.lcdCounter.hide()
         self.video_widget.lcdNumber.hide()
-        self.set_background_image(self.backgroundImageLabel, 'images/breathalyzerImage.jpg')
+        self.set_background_image(self.backgroundImageLabel, 'Media/images/breathalyzerImage.jpg')
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
         self.workingWidget = VideoWidget(self)

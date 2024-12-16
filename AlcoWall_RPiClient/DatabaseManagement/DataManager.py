@@ -4,13 +4,13 @@ import os
 import json
 from datetime import datetime
 import requests
-from CONSTANTS import BASE_URL, DEVICE_ID
+from Constants.GENERALCONSTANTS import BASE_URL, DEVICE_ID
 
 class DataManager:
     def __init__(self, device_id):
         self.device_id = device_id
-        self.highscore_file = "jsonFiles/highscores.json"
-        self.alcohol_results_file = "jsonFiles/alcohol_results.json"
+        self.highscore_file = "DatabaseManagement/jsonFiles/highscores.json"
+        self.alcohol_results_file = "DatabaseManagement/jsonFiles/alcohol_results.json"
         self.base_url = BASE_URL
 
     def ensure_directory_exists(self, directory):

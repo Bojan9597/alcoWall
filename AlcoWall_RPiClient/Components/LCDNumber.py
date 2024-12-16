@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QLCDNumber, QApplication
 from PySide6.QtGui import QPainter, QColor, QFont
 from PySide6.QtCore import Qt
 import sys
-from ComponentsConstants.LCDNumberConstants import *
+from Constants.ComponentsConstants.LCDNumberConstants import *
 
 class LCDNumber(QLCDNumber):
     def __init__(self, parent=None):

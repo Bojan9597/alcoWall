@@ -2,13 +2,13 @@
 
 import os
 from PySide6.QtCore import QTimer, Qt, Slot
-from AlcoWall import AlcoWall
+from Components.AlcoWall import AlcoWall
 from States.state import State
 import requests
 from urllib.parse import urlparse
 import subprocess
-from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, VIDEOS_DIRECTORY, DEVICE_ID
-from DataManager import DataManager
+from Constants.GENERALCONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT, VIDEOS_DIRECTORY, DEVICE_ID
+from DatabaseManagement.DataManager import DataManager
 from States.AlcoholCheck import AlcoholCheck
 
 alcoWall = AlcoWall()
@@ -59,7 +59,7 @@ class InitialState(State):
             else:
                 self.download_and_play_video(video_url, video_path)
         else:
-            alcoWall.video_widget.play_video("videos/beer1.mp4")
+            alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
 
     def download_and_play_video(self, video_url, save_path):
@@ -76,7 +76,7 @@ class InitialState(State):
                 if self.is_video_corrupted(save_path):
                     print(f"Downloaded video is corrupted, deleting: {save_path}")
                     os.remove(save_path)
-                    alcoWall.video_widget.play_video("videos/beer1.mp4")
+                    alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
                 else:
                     resolution = self.get_video_resolution(save_path)
                     print(f"Video resolution: {resolution[0]}x{resolution[1]}")
@@ -89,10 +89,10 @@ class InitialState(State):
 
             else:
                 print(f"Failed to download video. Status code: {response.status_code}")
-                alcoWall.video_widget.play_video("videos/beer1.mp4")
+                alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
         except requests.ConnectionError as e:
             print(f"Connection error while downloading: {e}")
-            alcoWall.video_widget.play_video("videos/beer1.mp4")
+            alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
 
     def is_video_corrupted(self, video_path):
         """Check if the video is corrupted using ffmpeg."""

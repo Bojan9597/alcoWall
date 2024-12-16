@@ -2,11 +2,11 @@
 
 import os
 from PySide6.QtCore import QTimer, Qt, QDateTime
-from AlcoWall import AlcoWall
+from Components.AlcoWall import AlcoWall
 from States.state import State
 from datetime import datetime
-from CONSTANTS import COUNTER_FOR_ALCOHOL_MEASURING, DEVICE_ID, ALCOHOL_LEVEL_ALLOWED_ERROR, ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK
-from DataManager import DataManager  # Import the DataManager
+from Constants.GENERALCONSTANTS import COUNTER_FOR_ALCOHOL_MEASURING, DEVICE_ID, ALCOHOL_LEVEL_ALLOWED_ERROR, ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK
+from DatabaseManagement.DataManager import DataManager  # Import the DataManager
 
 alcoWall = AlcoWall()
 
@@ -46,7 +46,7 @@ class AlcoholCheck(State):
         self.alcohol_local_maximum_timer = QTimer()
         self.alcohol_local_maximum_timer.timeout.connect(self.check_local_maximum)
         self.alcohol_local_maximum_timer.start(300)  # Check every 300 milliseconds
-        alcoWall.workingWidget.play_video('videos/beer1.mp4')
+        alcoWall.workingWidget.play_video('Media/videos/beer1.mp4')
 
         # Create an instance of DataManager
         self.data_manager = DataManager(DEVICE_ID)

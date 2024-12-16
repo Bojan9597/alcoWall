@@ -5,8 +5,8 @@ from PySide6.QtGui import QImage, QPainter, QFont
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QSizePolicy, QHBoxLayout
 from PySide6.QtWidgets import QLabel, QLCDNumber
 import imageio
-from LCDNumber import LCDNumber
-from CONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT
+from Components.LCDNumber import LCDNumber
+from Constants.GENERALCONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT
 from PySide6.QtCore import Signal
 
 class VideoWidget(QWidget):
