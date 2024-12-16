@@ -28,10 +28,6 @@ class AlcoholCheck(State):
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.show()
 
-        self.check_proximity_timer = QTimer()
-        self.check_proximity_timer.timeout.connect(self.check_proximity)
-        self.check_proximity_timer.start(1000)  # Check every 1 second
-
         self.counterTimer = QTimer()
         self.counterTimer.timeout.connect(self.decreaseCounter)
         self.counterTimer.start(1000)
@@ -39,7 +35,6 @@ class AlcoholCheck(State):
         alcoWall.workingWidget.alcoholSensorText.hide()
 
         alcoWall.workingWidget.alcoholSensorText.setText("Blow into the alcohol \n sensor until the beep")
-        alcoWall.workingWidget.proximitySensorText.setText("")
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdNumber.setValue(0)
         alcoWall.workingWidget.lcdCounter.setText(str(self.counterForMeasuring))
@@ -112,19 +107,6 @@ class AlcoholCheck(State):
                 return False
         except FileNotFoundError:
             return True
-
-    def check_proximity(self):
-        """
-        Checks the proximity of the user to ensure they are close enough for a precise measurement.
-        """
-        try:
-            distance = alcoWall.get_proximity_distance()
-            if 0 <= distance < 20:
-                alcoWall.workingWidget.proximitySensorText.setText("")
-            else:
-                alcoWall.workingWidget.proximitySensorText.setText("Come closer for a \nprecise measurement")
-        except FileNotFoundError:
-            pass
 
     def check_alcohol(self):
         """

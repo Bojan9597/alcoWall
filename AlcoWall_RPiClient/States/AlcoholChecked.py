@@ -27,7 +27,6 @@ class AlcoholChecked(State):
         alcoWall.alcohol_level_to_show = 0
         alcoWall.update_alcohol_level(-1)
         alcoWall.workingWidget.alcoholSensorText.setText("")
-        alcoWall.workingWidget.proximitySensorText.setText("")
         alcoWall.workingWidget.resultLabelText.setText("Alcohol level: ")
         alcoWall.workingWidget.lcdCounter.setText("")
         alcoWall.workingWidget.alcoholSensorText.hide()
@@ -42,10 +41,10 @@ class AlcoholChecked(State):
         Fetches a fun fact using DataManager and displays it on the proximitySensorText widget with dynamic font size adjustment.
         """
         fact_sentence = self.data_manager.get_fun_fact()
-        alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
+        # alcoWall.workingWidget.proximitySensorText.setWordWrap(True)  # Enable word wrap
 
         # Set the fun fact text with font adjustment to fit within half the label width
-        self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
+        # self.adjust_font_size_to_fit_half_width(alcoWall.workingWidget.proximitySensorText, fact_sentence)
 
     def adjust_font_size_to_fit_half_width(self, label, text):
         """

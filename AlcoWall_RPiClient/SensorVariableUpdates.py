@@ -16,7 +16,6 @@ class SensorVariableUpdates:
         # self.coin_check_timer = QTimer()
         # self.coin_check_timer.timeout.connect(self.check_variable_updates)
         # self.coin_check_timer.start(1000)
-        self.distanceSensor = None
         self.alcoholSensor = None
         self.coinAcceptor = None
         self.coin_insertions = []
@@ -27,11 +26,6 @@ class SensorVariableUpdates:
 
         # Check if the code is running on Raspberry Pi
         if platform.system() == TARGET_PLATFORM_SYSTEM and TARGET_PLATFORM_ARCHITECTURE in platform.machine():
-            from sensorReadout.DistanceSensor import DistanceSensor
-            self.distanceSensor = DistanceSensor()
-            self.distanceSensorThread = threading.Thread(target=self.distanceSensor.run, daemon=True)
-            self.distanceSensorThread.start()
-
             from sensorReadout.AlcoholSensor import AlcoholSensor
             self.alcoholSensor = AlcoholSensor()
             self.alcoholSensorThread = threading.Thread(target=self.alcoholSensor.run, daemon=True)
@@ -66,16 +60,6 @@ class SensorVariableUpdates:
                 pass
 
         # Handling other sensors
-        if self.distanceSensor:
-            alcoWall.update_proximity_distance(self.distanceSensor.get_distance())
-        else:
-            try:
-                with open("testFiles/proximityCheck.txt", "r") as file:
-                    content = file.read().strip()
-                if content != "":
-                    alcoWall.update_proximity_distance(int(content))
-            except FileNotFoundError:
-                pass
         if self.alcoholSensor:
             alcoWall.update_alcohol_level(self.alcoholSensor.get_alcohol_level())
         else:

@@ -27,7 +27,6 @@ class AlcoWall(QWidget):
 
         self.credit = 0
         self.alcohol_level = -1
-        self.proximity_distance = -1
 
         self.service_door_open = False
         self.coins_door_open = False
@@ -48,15 +47,12 @@ class AlcoWall(QWidget):
         self.backgroundImageLabel = self.ui.findChild(QLabel, "backgroundImageLabel")
         self.video_widget = VideoWidget(self)
         self.video_widget.alcoholSensorText.hide()
-        self.video_widget.proximitySensorText.hide()
         self.video_widget.lcdCounter.hide()
         self.video_widget.lcdNumber.hide()
         self.set_background_image(self.backgroundImageLabel, 'images/breathalyzerImage.jpg')
 
         self.main_videos_widget = self.ui.findChild(QWidget, "backgroundContainer")
         self.workingWidget = VideoWidget(self)
-        half_width = PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES * self.workingWidget.proximitySensorText.parent().width()
-        self.workingWidget.proximitySensorText.setFixedWidth(half_width) 
         self.main_videos_widget.layout().addWidget(self.workingWidget)
 
         layout = video_container.layout()
@@ -98,20 +94,6 @@ class AlcoWall(QWidget):
         """Set the alcohol level. but thread safe."""
         with threading.Lock():
             self.alcohol_level = alcohol_level
-    
-    def update_proximity_distance(self, proximity_distance):
-        """Update the proximity distance. but thread safe."""
-        with threading.Lock():
-            self.proximity_distance = proximity_distance
-
-    def get_proximity_distance(self):
-        """Get the current proximity distance."""
-        return self.proximity_distance
-    
-    def set_proximity_distance(self, proximity_distance):
-        """Set the proximity distance. but thread safe."""
-        with threading.Lock():
-            self.proximity_distance = proximity_distance
 
     def read_device_id(self):
         """Read the device ID from the device_id.txt file."""
