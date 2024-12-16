@@ -275,7 +275,7 @@ class DataManager:
                     print("No ad URL found in the response.")
                     return None
             else:
-                print(f"Failed to fetch ad URL. Status code: {response.status_code}")
+                print(f"Failed to fetch ad URL. Status code: {e}")
                 return None
         except requests.RequestException as e:
             print(f"Request to fetch ad URL failed: {e}")
