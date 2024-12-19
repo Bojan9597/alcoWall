@@ -302,6 +302,22 @@ class CoinAcceptor:
         self.credit = 0
         self.coin_dic = {4: 100, 1: 10, 2: 20, 3: 50, 5: 200, 6: 500}
 
+    def reject_all_coins(self):
+        """Send command to the coin acceptor to reject all coins."""
+        try:
+            self.coin_messenger.master_inhibit(state=False)  # Disable coin acceptance
+            print("Coin acceptor is now rejecting all coins.")
+        except Exception as e:
+            print(f"Error rejecting all coins: {e}")
+
+    def accept_all_coins(self):
+        """Send command to the coin acceptor to accept all coins."""
+        try:
+            self.coin_messenger.master_inhibit(state=True)  # Enable coin acceptance
+            print("Coin acceptor is now accepting all coins.")
+        except Exception as e:
+            print(f"Error accepting all coins: {e}")
+
     def get_credit(self):
         with threading.Lock():
             return self.credit
@@ -318,8 +334,10 @@ class CoinAcceptor:
         
         self.coin_messenger.accept_coins(mask=[255, 255])  # Enable all coins
         print("Coin validator enabled. Waiting for coins...")
+        self.reject_all_coins()
         try:
-            last_status_number = None
+            status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
+            last_status_number = status[0]
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
                 if status and len(status) > 1 and status[0] != last_status_number:
@@ -327,6 +345,7 @@ class CoinAcceptor:
                     coin_code = status[1]  # Coin ID received
                     coin_value = self.coin_dic.get(coin_code, None)
                     if coin_value is not None:
+                        print(f"Coin inserted: {coin_value}")
                         self.update_credit(coin_value)
                         
 
