@@ -305,7 +305,7 @@ class CoinAcceptor:
     def reject_all_coins(self):
         """Send command to the coin acceptor to reject all coins."""
         try:
-            self.coin_messenger.master_inhibit(state=False)  # Disable coin acceptance
+            self.coin_messenger.master_inhibit(state=True)  # Disable coin acceptance
             print("Coin acceptor is now rejecting all coins.")
         except Exception as e:
             print(f"Error rejecting all coins: {e}")
@@ -313,7 +313,7 @@ class CoinAcceptor:
     def accept_all_coins(self):
         """Send command to the coin acceptor to accept all coins."""
         try:
-            self.coin_messenger.master_inhibit(state=True)  # Enable coin acceptance
+            self.coin_messenger.master_inhibit(state=False)  # Enable coin acceptance
             print("Coin acceptor is now accepting all coins.")
         except Exception as e:
             print(f"Error accepting all coins: {e}")
@@ -334,7 +334,7 @@ class CoinAcceptor:
         
         self.coin_messenger.accept_coins(mask=[255, 255])  # Enable all coins
         print("Coin validator enabled. Waiting for coins...")
-        self.reject_all_coins()
+        self.accept_all_coins()
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
             last_status_number = status[0]
