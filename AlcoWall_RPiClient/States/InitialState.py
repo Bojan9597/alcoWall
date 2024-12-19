@@ -15,7 +15,6 @@ alcoWall = AlcoWall()
 
 class InitialState(State):
     def __init__(self):
-        alcoWall.set_credit(0)
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()
@@ -173,7 +172,7 @@ class InitialState(State):
 
     def check_coin_inserted(self):
         try:
-            if alcoWall.get_credit() >= 1:
+            if alcoWall.get_credit() >= 100:
                 alcoWall.handle_successful()
             else:
                 alcoWall.handle_unsuccessful()

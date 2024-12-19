@@ -16,7 +16,7 @@ class AlcoholCheck(State):
         Initializes the AlcoholCheck state.
         """
         self.start_time = QDateTime.currentDateTime()
-        alcoWall.set_credit(-1)
+        alcoWall.update_credit(-100)
 
         self.elapsed_timer = QTimer()
         self.elapsed_timer.timeout.connect(self.check_elapsed_time)

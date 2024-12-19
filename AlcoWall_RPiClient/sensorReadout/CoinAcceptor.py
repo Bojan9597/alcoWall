@@ -48,7 +48,7 @@ class CoinAcceptor:
     def run(self):
         try:
             while True:
-                time.sleep(0.1)  # Reduced sleep time for more responsive checks
+                time.sleep(0.1) 
                 if time.time() - self.last_pulse_time > 0.5 and self.pulse_count > 0:
                     self.check_credits()
 

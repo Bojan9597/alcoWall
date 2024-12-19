@@ -12,13 +12,14 @@ alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
     def __init__(self):
-        self.counter = 0
-        # self.coin_check_timer = QTimer()
-        # self.coin_check_timer.timeout.connect(self.check_variable_updates)
-        # self.coin_check_timer.start(1000)
         self.alcoholSensor = None
-        self.coinAcceptor = None
         self.coin_insertions = []
+
+        
+        from sensorReadout.CoinAcceptor_New import CoinAcceptor
+        self.coinAcceptor = CoinAcceptor()
+        self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
+        self.coin_thread.start()
 
         # Start a new thread to handle sensor updates and network requests
         self.thread = threading.Thread(target=self.run_sensor_updates, daemon=True)
@@ -31,35 +32,18 @@ class SensorVariableUpdates:
             self.alcoholSensorThread = threading.Thread(target=self.alcoholSensor.run, daemon=True)
             self.alcoholSensorThread.start()
 
-            from sensorReadout.CoinAcceptor import CoinAcceptor
-            self.coinAcceptor = CoinAcceptor()
-            self.coin_thread = threading.Thread(target=self.coinAcceptor.run, daemon=True)
-            self.coin_thread.start()
-
     def run_sensor_updates(self):
-        """Separate thread for checking sensor updates and sending data."""
         while True:
             self.check_variable_updates()
             threading.Event().wait(1)
 
     def check_variable_updates(self):
-        # Handling coin acceptor
         if self.coinAcceptor:
             if self.coinAcceptor.get_credit() > 0:
-                self.record_coin_insertion(self.coinAcceptor.get_credit()) 
                 alcoWall.update_credit(self.coinAcceptor.get_credit())
+                print(f"Credit: {alcoWall.get_credit()}")
                 self.coinAcceptor.set_credit(0)
-        else:
-            try:
-                with open("testFiles/coinInserted.txt", "r") as file:
-                    content = file.read().strip()
-                if content != "" and content != "0":
-                    self.send_coin_insertions(float(content))
-                    alcoWall.update_credit(float(content))
-            except FileNotFoundError:
-                pass
 
-        # Handling other sensors
         if self.alcoholSensor:
             alcoWall.update_alcohol_level(self.alcoholSensor.get_alcohol_level())
         else:
