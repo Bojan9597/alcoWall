@@ -19,7 +19,7 @@ class InitialState(State):
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()
 
-        self.device_id = DEVICE_ID
+        self.device_id = alcoWall.read_device_id()
         self.data_manager = DataManager(self.device_id)
         self.get_highscores()
 
