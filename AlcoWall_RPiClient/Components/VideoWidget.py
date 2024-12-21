@@ -63,19 +63,27 @@ class VideoWidget(QWidget):
             self.video_finished.emit()
             self.cap.set_image_index(0)  # Reset to the first frame
             frame = self.cap.get_next_data()
+        except Exception as e:
+            self.video_finished.emit()
+            self.cap.set_image_index(0)  # Reset to the first frame
+            frame = self.cap.get_next_data()
+            print(f"Error reading video frame: {e}")
 
         self.frame = frame
         self.repaint()
 
     def paintEvent(self, event):
-        if hasattr(self, 'frame'):
-            frame_rgb = self.frame
-            h, w, ch = frame_rgb.shape
-            bytes_per_line = ch * w
-            qt_image = QImage(frame_rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        try:
+            if hasattr(self, 'frame'):
+                frame_rgb = self.frame
+                h, w, ch = frame_rgb.shape
+                bytes_per_line = ch * w
+                qt_image = QImage(frame_rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
-            painter = QPainter(self)
-            painter.drawImage(0, 0, qt_image.scaled(self.size(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+                painter = QPainter(self)
+                painter.drawImage(0, 0, qt_image.scaled(self.size(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation))    
+        except Exception as e:
+            print(f"Error painting video frame: {e}")
 
     def closeEvent(self, event):
         self.cap.close()  # Properly close the video reader

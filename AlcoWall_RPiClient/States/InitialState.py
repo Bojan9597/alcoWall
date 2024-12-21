@@ -35,7 +35,6 @@ class InitialState(State):
 
     @Slot()
     def video_finished_handler(self):
-        print("Video finished.")
         self.play_next_video()
 
     def play_next_video(self):
@@ -73,18 +72,28 @@ class InitialState(State):
                 print(f"Video downloaded successfully and saved to {save_path}")
 
                 if self.is_video_corrupted(save_path):
-                    print(f"Downloaded video is corrupted, deleting: {save_path}")
-                    os.remove(save_path)
                     alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                    print(f"Downloaded video is corrupted, deleting: {save_path}")
+                    if os.path.exists(save_path):
+                        os.remove(save_path)
                 else:
                     resolution = self.get_video_resolution(save_path)
-                    print(f"Video resolution: {resolution[0]}x{resolution[1]}")
+                    if resolution:
+                        print(f"Video resolution: {resolution[0]}x{resolution[1]}")
 
-                    if resolution != (VIDEO_WIDTH, VIDEO_HEIGHT):
-                        print(f"Converting video to {VIDEO_WIDTH}x{VIDEO_HEIGHT} resolution...")
-                        self.convert_video_to_resolution(save_path, VIDEO_WIDTH, VIDEO_HEIGHT)
-                        print("Video converted successfully.")
-                    alcoWall.video_widget.play_video(save_path)
+                        if resolution != (VIDEO_WIDTH, VIDEO_HEIGHT):
+                            print(f"Converting video to {VIDEO_WIDTH}x{VIDEO_HEIGHT} resolution...")
+                            if self.convert_video_to_resolution(save_path, VIDEO_WIDTH, VIDEO_HEIGHT):
+                                print("Video converted successfully.")
+                                alcoWall.video_widget.play_video(save_path)
+                            else:
+                                alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                                print("Failed to convert video.")
+                                if os.path.exists(save_path):
+                                    os.remove(save_path)
+                    else:
+                        print("Failed to get video resolution.")
+                        alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
 
             else:
                 print(f"Failed to download video. Status code: {response.status_code}")
@@ -126,17 +135,22 @@ class InitialState(State):
             return None, None
 
     def convert_video_to_resolution(self, video_path, width, height):
-        """Convert the video to the specified resolution using ffmpeg."""
+        "Convert the video to the specified resolution using ffmpeg."
         try:
-            temp_path = video_path + "_temp.mp4"
+            temp_path = f"{video_path}_temp.mp4"
             subprocess.run(
                 ["ffmpeg", "-i", video_path, "-vf", f"scale={width}:{height}", "-crf", "23", temp_path],
                 check=True
             )
             # Replace the original file with the converted one
             os.replace(temp_path, video_path)
+            return True
         except subprocess.CalledProcessError as e:
             print(f"Error during video conversion: {e}")
+            return False
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
 
     def extract_filename_from_url(self, video_url):
         parsed_url = urlparse(video_url)
