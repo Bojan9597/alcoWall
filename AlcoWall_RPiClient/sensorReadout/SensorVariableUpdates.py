@@ -13,6 +13,7 @@ alcoWall = AlcoWall()
 class SensorVariableUpdates:
     def __init__(self):
         self.alcoholSensor = None
+        self.coinAcceptor = None
         self.coin_insertions = []
 
         # Start a new thread to handle sensor updates and network requests
