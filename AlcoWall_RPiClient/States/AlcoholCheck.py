@@ -15,6 +15,8 @@ class AlcoholCheck(State):
         """
         Initializes the AlcoholCheck state.
         """
+        self.change_current_state_file()
+
         self.start_time = QDateTime.currentDateTime()
         alcoWall.update_credit(-100)
 
@@ -50,6 +52,13 @@ class AlcoholCheck(State):
 
         # Create an instance of DataManager
         self.data_manager = DataManager(DEVICE_ID)
+    
+    def change_current_state_file(self):
+        try:
+            with open ("States/current_state.txt", "w") as file:
+                file.write("AlcoholCheck")
+        except FileNotFoundError:
+            pass
 
     def handle_successful(self):
         """

@@ -17,6 +17,7 @@ class AlcoholChecked(State):
         Initializes the AlcoholChecked state, hides unnecessary UI elements,
         and sets up a timer for transitioning back to the initial state.
         """
+        self.change_current_state_file()
         alcoWall.video_widget.hide()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.show()
@@ -35,7 +36,13 @@ class AlcoholChecked(State):
         self.data_manager = DataManager(DEVICE_ID)
         # Call function to get fun fact and display it
         self.get_fun_fact()
-
+    
+    def change_current_state_file(self):
+        try:
+            with open ("States/current_state.txt", "w") as file:
+                file.write("AlcoholChecked")
+        except FileNotFoundError:
+            pass
     def get_fun_fact(self):
         """
         Fetches a fun fact using DataManager and displays it on the funFactText widget with dynamic font size adjustment.

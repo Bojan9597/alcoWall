@@ -15,6 +15,7 @@ alcoWall = AlcoWall()
 
 class InitialState(State):
     def __init__(self):
+        self.change_current_state_file()
         alcoWall.video_widget.show()
         alcoWall.backgroundImageLabel.hide()
         alcoWall.workingWidget.hide()
@@ -33,6 +34,12 @@ class InitialState(State):
         self.start_fetching_videos()
         alcoWall.video_widget.video_finished.connect(self.video_finished_handler)
 
+    def change_current_state_file(self):
+        try:
+            with open ("States/current_state.txt", "w") as file:
+                file.write("InitialState")
+        except FileNotFoundError:
+            pass
     @Slot()
     def video_finished_handler(self):
         self.play_next_video()
