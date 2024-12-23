@@ -5,7 +5,7 @@ REPO_URL="https://github.com/Bojan9597/alcoWall.git"
 DESKTOP_DIR="$HOME/Desktop/AlcoWall"
 VENV_DIR="$HOME/AlcoWallEnvironment"
 SCRIPT_DIR="$DESKTOP_DIR/alcowall/AlcoWall_RPiClient"
-SCRIPT_PATH="$SCRIPT_DIR/main.py"
+SCRIPT_PATH="$SCRIPT_DIR/update_over_the_air_script.py"
 
 # Step 1: Clone the repository
 mkdir -p "$DESKTOP_DIR"
