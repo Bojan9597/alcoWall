@@ -119,6 +119,7 @@ def main():
             start_script()
         
         if check_if_current_state_is_initial():
+            #test
             time.sleep(10)
             continue
             
