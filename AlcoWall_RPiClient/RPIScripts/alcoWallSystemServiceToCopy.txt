@@ -1,6 +1,5 @@
 [Unit]
-Description=AlcoWall Raspberry Pi Client with Automatic Recovery
-After=network.target
+Description=AlcoWall
 
 [Service]
 User=bojan
@@ -10,14 +9,15 @@ WorkingDirectory=/home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/
 Environment="HOME=/home/bojan"
 Environment="DISPLAY=:0"
 
-ExecStart= /home/bojan/AlcoWallEnvironment/bin/python3 /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/update_over_the_air_script.py
+ExecStart=/home/bojan/AlcoWallEnvironment/bin/python3 /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/update_over_the_air_script.py
 
 StandardOutput=journal
 StandardError=journal
-
 Restart=always
 RestartSec=5
 
-
 StartLimitBurst=10
-StartLimitIntervalSeconds=30
+StartLimitIntervalSec=30
+
+[Install]
+WantedBy=multi-user.target
