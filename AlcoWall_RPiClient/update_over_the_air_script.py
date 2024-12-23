@@ -94,7 +94,7 @@ def internet_is_available():
 def check_if_current_state_is_initial():
         try:
             with open ("States/current_state.txt", "r") as file:
-                return file.read().strip() != "InitialState"
+                return file.read().strip() == "InitialState"
         except FileNotFoundError:
             pass
 
