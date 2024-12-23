@@ -7,7 +7,7 @@ from PySide6.QtGui import QPixmap
 from Components.VideoWidget import VideoWidget
 from Constants.GENERALCONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES
 import threading
-
+#testing ota
 class AlcoWall(QWidget):
     _instance = None
 
