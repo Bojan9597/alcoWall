@@ -119,8 +119,9 @@ def main():
             start_script()
         
         if check_if_current_state_is_initial():
-            continue
             time.sleep(10)
+            continue
+            
 
         if internet_is_available():
             print("Internet connection is available. Checking for updates...")
