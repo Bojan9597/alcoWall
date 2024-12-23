@@ -17,7 +17,12 @@ else
     cd "$DESKTOP_DIR/alcowall" && git pull
 fi
 
-# Step 2: Create and activate the virtual environment
+# Step 2: Install system dependencies for Qt
+echo "Installing system dependencies..."
+sudo apt update
+sudo apt install -y libxcb-cursor0 libxkbcommon-x11-0 libx11-xcb-dev
+
+# Step 3: Create and activate the virtual environment
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating virtual environment..."
     python3 -m venv "$VENV_DIR"
@@ -26,12 +31,12 @@ fi
 # Activate the virtual environment
 source "$VENV_DIR/bin/activate"
 
-# Step 3: Install required Python packages
+# Step 4: Install required Python packages
 echo "Installing required Python packages..."
 pip install --upgrade pip
 pip install requests PySide6 adafruit-circuitpython-ads1x15 IPython imageio[ffmpeg]
 
-# Step 4: Change directory to the script's location and run it
+# Step 5: Change directory to the script's location and run it
 cd "$SCRIPT_DIR"
 echo "Running the Python script..."
 python "$SCRIPT_PATH"
