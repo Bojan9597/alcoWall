@@ -5,13 +5,12 @@ After=network.target
 [Service]
 User=bojan
 Group=bojan
-WorkingDirectory=/home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/
+WorkingDirectory=/home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/
 
 Environment="HOME=/home/bojan"
 Environment="DISPLAY=:0"
 
-ExecStart=/bin/bash /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/run.sh
-ExecStopPost=/bin/bash /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/run.sh
+ExecStart= /home/bojan/AlcoWallEnvironment/bin/python3 /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/update_over_the_air_script.py
 
 StandardOutput=journal
 StandardError=journal
@@ -19,5 +18,6 @@ StandardError=journal
 Restart=always
 RestartSec=5
 
-[Install]
-WantedBy=multi-user.target
+
+StartLimitBurst=10
+StartLimitIntervalSeconds=30

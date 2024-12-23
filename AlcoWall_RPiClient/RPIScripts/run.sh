@@ -36,13 +36,5 @@ echo "Installing required Python packages..."
 pip install --upgrade pip
 pip install requests PySide6 adafruit-circuitpython-ads1x15 IPython imageio[ffmpeg]
 
-# Step 5: Change directory to the script's location and run it
-cd "$SCRIPT_DIR"
-echo "Running the Python script..."
-python "$SCRIPT_PATH"
-
-# Deactivate the virtual environment
-deactivate
-
 # End of script
 echo "Done!"
