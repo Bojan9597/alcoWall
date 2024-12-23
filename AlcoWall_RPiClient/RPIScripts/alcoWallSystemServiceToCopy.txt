@@ -1,19 +1,23 @@
 [Unit]
-Description=AlcoWall Raspberry Pi Client OTA Script
+Description=AlcoWall Raspberry Pi Client with Automatic Recovery
+After=network.target
 
 [Service]
 User=bojan
 Group=bojan
-WorkingDirectory=/home/bojan/Desktop/alcoWall/AlcoWall_RPiClient/
+WorkingDirectory=/home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/
 
 Environment="HOME=/home/bojan"
 Environment="DISPLAY=:0"
 
-ExecStart=/home/bojan/Desktop/envForAlcoWall/bin/python3 /home/bojan/Desktop/al>
+ExecStart=/bin/bash /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/run.sh
+ExecStopPost=/bin/bash /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/RPIScripts/run.sh
+
 StandardOutput=journal
 StandardError=journal
+
 Restart=always
 RestartSec=5
 
-StartLimitBurst=10
-StartLimitIntervalSec=30
+[Install]
+WantedBy=multi-user.target
