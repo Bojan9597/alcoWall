@@ -4,7 +4,7 @@ import subprocess
 import psutil
 import requests
 import json
-import platform  # Import platform module for OS and architecture checks
+import platform
 from Constants.GENERALCONSTANTS import *
 
 # Use the current working directory as the repository path
@@ -14,6 +14,10 @@ SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
 # Path to the virtual environment's Python interpreter for Raspberry Pi
 VENV_PYTHON = "/home/bojan/AlcoWallEnvironment/bin/python3"
 
+STATE_FILE = os.path.join(REPO_PATH, "States", "current_state.txt")
+INITIAL_STATE = "InitialState"
+
+
 def read_device_id():
     """Read the device ID from the device_id.txt file."""
     try:
@@ -21,6 +25,23 @@ def read_device_id():
             return file.read().strip()
     except FileNotFoundError:
         return None
+
+
+def read_current_state():
+    """Read the current state from the state file."""
+    try:
+        with open(STATE_FILE, 'r') as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return None
+
+
+def write_current_state(state):
+    """Write the given state to the state file."""
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+    with open(STATE_FILE, 'w') as file:
+        file.write(state)
+
 
 def get_github_branch(device_id):
     """Get the GitHub branch name by making a POST request with the device ID."""
@@ -33,6 +54,7 @@ def get_github_branch(device_id):
     except requests.RequestException:
         return None
 
+
 def is_process_running(script_name):
     """Check if the Python script is currently running."""
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
@@ -44,11 +66,13 @@ def is_process_running(script_name):
             pass
     return None
 
+
 def stop_process(process):
     """Terminate the given process."""
     if process:
         process.terminate()
         process.wait()
+
 
 def update_repository(branch_name):
     """Pull the latest changes from the specified branch."""
@@ -61,14 +85,14 @@ def update_repository(branch_name):
     
     subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
 
+
 def start_script():
     """Start the Python script using the appropriate Python interpreter."""
     if platform.system() == "Linux" and platform.machine() in ("armv7l", "armv6l", "aarch64"):
-        # On Raspberry Pi, use the virtual environment Python interpreter
         subprocess.Popen([VENV_PYTHON, SCRIPT_PATH])
     else:
-        # On regular Linux, use the default python3 interpreter
         subprocess.Popen(["python3", SCRIPT_PATH])
+
 
 def check_for_updates(branch_name):
     """Check if local repository is up-to-date with the remote branch."""
@@ -84,6 +108,7 @@ def check_for_updates(branch_name):
 
     return local_commit != remote_commit
 
+
 def internet_is_available():
     """Check if the internet connection is available by pinging a known server."""
     try:
@@ -91,6 +116,7 @@ def internet_is_available():
         return True
     except requests.ConnectionError:
         return False
+
 
 def main():
     """Main loop to check for updates while ensuring the script runs even without internet."""
@@ -100,12 +126,23 @@ def main():
         print("Device ID not found. Exiting.")
         return
 
+    # Set the state to InitialState initially
+    write_current_state(INITIAL_STATE)
+
     # Start the main application script immediately
     start_script()
 
     branch_name = get_github_branch(device_id)
 
     while True:
+        current_state = read_current_state()
+
+        # Proceed only if the state is InitialState
+        if current_state != INITIAL_STATE:
+            print(f"Current state is {current_state}. Update skipped.")
+            time.sleep(10)
+            continue
+
         # Check if the main script is running; if not, restart it
         process = is_process_running(SCRIPT_PATH)
         if not process:
@@ -135,6 +172,7 @@ def main():
             print("No internet connection. Retrying in 10 seconds.")
 
         time.sleep(10)
+
 
 if __name__ == "__main__":
     main()
