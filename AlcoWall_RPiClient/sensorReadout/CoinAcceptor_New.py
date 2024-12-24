@@ -11,8 +11,9 @@ from struct import unpack
 
 def find_coin_acceptor():
     ports = list_ports.comports()
+    print(ports)
     for port in ports:
-        if "tty" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
+        if "ttyACM" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
             return port.device
     raise Exception("Coin acceptor not found. Ensure it is connected.")
 
