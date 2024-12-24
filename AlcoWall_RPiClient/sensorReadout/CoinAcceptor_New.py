@@ -6,6 +6,17 @@ import time
 from struct import unpack
 import threading
 
+from serial.tools import list_ports
+from struct import unpack
+
+def find_coin_acceptor():
+    """Find the port to which the coin acceptor is connected."""
+    ports = list_ports.comports()
+    for port in ports:
+        if "Coin Acceptor" in port.description:  # Adjust description if needed
+            return port.device
+    raise Exception("Coin acceptor not found. Please check the connection.")
+
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
 
 
@@ -295,7 +306,7 @@ class CoinMessenger(object):
 
 class CoinAcceptor:
     def __init__(self):
-        port = "/dev/ttyACM0"  # Adjust this to your COM port
+        port = find_coin_acceptor()
         coin_validator_connection = make_serial_object(port)
         self.coin_messenger = CoinMessenger(coin_validator_connection)
         self.coin_messenger.set_accept_limit(25)
