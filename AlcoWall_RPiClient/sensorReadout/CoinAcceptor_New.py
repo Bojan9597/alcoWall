@@ -10,12 +10,11 @@ from serial.tools import list_ports
 from struct import unpack
 
 def find_coin_acceptor():
-    """Find the port to which the coin acceptor is connected."""
     ports = list_ports.comports()
     for port in ports:
-        if "Coin Acceptor" in port.description:  # Adjust description if needed
+        if "tty" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
             return port.device
-    raise Exception("Coin acceptor not found. Please check the connection.")
+    raise Exception("Coin acceptor not found. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
 
