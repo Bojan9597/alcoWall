@@ -355,7 +355,7 @@ class CoinAcceptor:
                 last_status_number = status[0]
             else:
                 #exit application if no coin is inserted
-                QCoreApplication.instance().quit()
+                QApplication.quit()
                 return
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
