@@ -349,7 +349,16 @@ class CoinAcceptor:
         self.accept_all_coins()
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            last_status_number = status[0]
+            if status and len(status) > 1:
+                last_status_number = status[0]
+            else:
+                time.sleep(5)
+                port = find_coin_acceptor()
+                coin_validator_connection = make_serial_object(port)
+                self.coin_messenger = CoinMessenger(coin_validator_connection)
+                self.coin_messenger.set_accept_limit(25)
+                return self.get_coin_type()
+                
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
                 if status and len(status) > 1 and status[0] != last_status_number:
