@@ -54,14 +54,9 @@ class InitialState(State):
             video_path = os.path.join(self.videos_directory, video_filename)
             print(f"Video URL: {alcoWall.next_add_url}")
             if os.path.exists(video_path):
-                if not self.is_video_corrupted(video_path):
-                    print(f"Playing video: {video_path}")
-                    alcoWall.video_widget.play_video(video_path)
-                    self.retry_timer.stop()  # Stop retrying
-                else:
-                    print(f"Video is corrupted, deleting: {video_path}")
-                    os.remove(video_path)
-                    self.retry_timer.start(1000)  # Retry fetching a valid video
+                print(f"Playing video: {video_path}")
+                alcoWall.video_widget.play_video(video_path)
+                self.retry_timer.stop()  # Stop retrying
             else:
                 self.download_and_play_video(alcoWall.next_add_url, video_path)
             alcoWall.next_add_url = self.data_manager.get_ad_url()
