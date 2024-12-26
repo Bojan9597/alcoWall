@@ -5,6 +5,8 @@ import serial
 import time
 from struct import unpack
 import threading
+from PySide6.QtCore import QCoreApplication
+from PySide6.QtWidgets import QApplication
 
 from serial.tools import list_ports
 from struct import unpack
@@ -353,7 +355,8 @@ class CoinAcceptor:
                 last_status_number = status[0]
             else:
                 #exit application if no coin is inserted
-                exit()
+                QCoreApplication.instance().quit()
+                return
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
                 if status and len(status) > 1 and status[0] != last_status_number:
