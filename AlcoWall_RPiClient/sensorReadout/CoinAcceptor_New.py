@@ -8,7 +8,7 @@ import threading
 
 from serial.tools import list_ports
 from struct import unpack
-#test for ota
+
 def find_coin_acceptor():
     ports = list_ports.comports()
     print(ports)
