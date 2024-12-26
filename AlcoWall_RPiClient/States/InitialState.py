@@ -48,7 +48,8 @@ class InitialState(State):
         print("Fetching video...")
         if not alcoWall.next_add_url:
             alcoWall.next_add_url = self.data_manager.get_ad_url()
-        else:
+
+        if alcoWall.next_add_url:
             video_filename = self.extract_filename_from_url(alcoWall.next_add_url)
             video_path = os.path.join(self.videos_directory, video_filename)
             print(f"Video URL: {alcoWall.next_add_url}")
