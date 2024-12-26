@@ -15,6 +15,7 @@ class AlcoholCheck(State):
         """
         Initializes the AlcoholCheck state.
         """
+        alcoWall.workingWidget.funFactText.setText("")
         self.change_current_state_file()
 
         self.start_time = QDateTime.currentDateTime()
