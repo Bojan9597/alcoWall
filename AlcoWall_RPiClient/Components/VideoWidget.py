@@ -31,7 +31,7 @@ class VideoWidget(QWidget):
         self.lcdNumber = LCDNumber()
         self.lcdNumber.setStyleSheet("border: none;")
         
-        self.coinLabelText = QLabel("")
+        self.coinLabelText = QLabel("Credit: 0.0")
         self.coinLabelText.setStyleSheet("color: white; font-size: 40px;")
         self.coinLabelText.setGeometry(VIDEO_WIDTH - 100, VIDEO_HEIGHT - 100, 100, 50)
     
