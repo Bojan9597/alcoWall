@@ -8,7 +8,7 @@ import imageio
 from Components.LCDNumber import LCDNumber
 from Constants.GENERALCONSTANTS import VIDEO_WIDTH, VIDEO_HEIGHT
 from PySide6.QtCore import Signal
-
+from Constants.GENERALCONSTANTS import CREDIT_LABEL_GEOMETRY
 class VideoWidget(QWidget):
     video_finished = Signal()
     def __init__(self, parent=None):
@@ -32,8 +32,10 @@ class VideoWidget(QWidget):
         self.lcdNumber.setStyleSheet("border: none;")
         
         self.coinLabelText = QLabel("Credit: 0.0")
-        self.coinLabelText.setStyleSheet("color: white; font-size: 40px;")
-        self.coinLabelText.setGeometry(VIDEO_WIDTH - 100, VIDEO_HEIGHT - 100, 100, 50)
+        self.coinLabelText.setStyleSheet("color: white; font-size: 40px; border: 2px solid white;")
+        self.coinLabelText.setGeometry(*CREDIT_LABEL_GEOMETRY)
+        self.coinLabelText.setFixedWidth(250)
+        self.coinLabelText.setFixedHeight(50)
     
         
         self.widget = QWidget()
