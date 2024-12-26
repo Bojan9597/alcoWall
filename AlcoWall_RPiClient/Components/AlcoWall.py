@@ -73,6 +73,7 @@ class AlcoWall(QWidget):
         with threading.Lock():
             self.credit += credit  
             self.video_widget.coinLabelText.setText(f"Credit: {round(self.credit/100,2)}")
+            self.workingWidget.coinLabelText.setText(f"Credit: {round(self.credit/100,2)}")
     
     def get_credit(self):
         """Get the current credit value."""
