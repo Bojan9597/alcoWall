@@ -31,11 +31,18 @@ class VideoWidget(QWidget):
         self.lcdNumber = LCDNumber()
         self.lcdNumber.setStyleSheet("border: none;")
         
+        self.coinWidget = QWidget()
+        self.CoinBox = QHBoxLayout()
         self.coinLabelText = QLabel("Credit: 0.0")
         self.coinLabelText.setStyleSheet("color: white; font-size: 40px; border: 2px solid white;")
         self.coinLabelText.setGeometry(*CREDIT_LABEL_GEOMETRY)
         self.coinLabelText.setFixedWidth(WIDTH_AND_HEIGHT_OF_CREDIT_LABEL[0])
         self.coinLabelText.setFixedHeight(WIDTH_AND_HEIGHT_OF_CREDIT_LABEL[1])
+        self.placeHolder = QLabel()
+        self.placeHolder.setStyleSheet("color: white; font-size: 40px;")
+        self.CoinBox.addWidget(self.coinLabelText)
+        self.CoinBox.addWidget(self.placeHolder)
+        self.coinWidget.setLayout(self.CoinBox)
     
         
         self.widget = QWidget()
@@ -49,7 +56,7 @@ class VideoWidget(QWidget):
         layout.addWidget(self.funFactText)
         layout.addWidget(self.resultLabelText)
         layout.addWidget(self.widget)
-        layout.addWidget(self.coinLabelText)
+        layout.addWidget(self.coinWidget)
         
         self.setLayout(layout)
 
