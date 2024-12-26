@@ -5,8 +5,6 @@ import serial
 import time
 from struct import unpack
 import threading
-from PySide6.QtCore import QCoreApplication
-from PySide6.QtWidgets import QApplication
 
 from serial.tools import list_ports
 from struct import unpack
@@ -18,10 +16,10 @@ def find_coin_acceptor():
     for port in ports:
         if "ttyACM" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
             return port.device
-    return None
     raise Exception("Coin acceptor not found. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
+
 
     if not data:
         seq = [to_slave_addr, 0, from_host_addr, code]
@@ -310,9 +308,6 @@ class CoinMessenger(object):
 class CoinAcceptor:
     def __init__(self):
         port = find_coin_acceptor()
-        if not port:
-            QApplication.quit()
-            
         coin_validator_connection = make_serial_object(port)
         self.coin_messenger = CoinMessenger(coin_validator_connection)
         self.coin_messenger.set_accept_limit(25)
@@ -352,15 +347,9 @@ class CoinAcceptor:
         self.coin_messenger.accept_coins(mask=[255, 255])  # Enable all coins
         print("Coin validator enabled. Waiting for coins...")
         self.accept_all_coins()
-        last_status_number = 0
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            if status and len(status) > 1:
-                last_status_number = status[0]
-            else:
-                #exit application if no coin is inserted
-                QApplication.quit()
-                return
+            last_status_number = status[0]
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
                 if status and len(status) > 1 and status[0] != last_status_number:
