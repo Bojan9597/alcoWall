@@ -9,20 +9,16 @@ import threading
 from serial.tools import list_ports
 from struct import unpack
 #test for ota
-def connect_to_coin_acceptor():
-    device_path = "/dev/ttyACM0"  # Or "/dev/ttyUSB0" if it's a USB-to-serial converter
-    baudrate = 9600  # Replace with your device's baud rate
-
-    try:
-        ser = serial.Serial(device_path, baudrate)
-        print(f"Connected to coin acceptor at {device_path}")
-        return ser
-    except serial.SerialException as e:
-        print(f"Error connecting to coin acceptor: {e}")
-        raise Exception(f"Coin acceptor not found at {device_path}. Ensure it is connected to the correct USB port.")
+def find_coin_acceptor():
+    ports = list_ports.comports()
+    print(ports)
+    print("Finding coin acceptor...")
+    for port in ports:
+        if "ttyACM0" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
+            return port.device
+    raise Exception("Coin acceptor not found. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
-
 
     if not data:
         seq = [to_slave_addr, 0, from_host_addr, code]
