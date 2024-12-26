@@ -26,7 +26,7 @@ class InitialState(State):
 
         self.coin_check_timer = QTimer()
         self.coin_check_timer.timeout.connect(self.check_next_state)
-        self.coin_check_timer.start(100)  # Check every 100 milliseconds
+        self.coin_check_timer.start(1000)  # Check every 100 milliseconds
 
         self.videos_directory = VIDEOS_DIRECTORY
         self.retry_timer = QTimer()

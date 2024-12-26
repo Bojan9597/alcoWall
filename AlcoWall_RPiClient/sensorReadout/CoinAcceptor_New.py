@@ -19,8 +19,6 @@ def find_coin_acceptor():
     raise Exception("Coin acceptor not found. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
-
-
     if not data:
         seq = [to_slave_addr, 0, from_host_addr, code]
     else:
