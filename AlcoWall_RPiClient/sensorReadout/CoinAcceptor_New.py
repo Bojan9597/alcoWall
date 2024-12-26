@@ -335,6 +335,7 @@ class CoinAcceptor:
     def update_credit(self, credit):
         with threading.Lock():
             self.credit += credit
+            print(f"Credit: {self.credit}")
 
     def set_credit(self, credit):
         with threading.Lock():
