@@ -18,6 +18,7 @@ def find_coin_acceptor():
     for port in ports:
         if "ttyACM0" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
             return port.device
+    return None
     raise Exception("Coin acceptor not found. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
@@ -309,6 +310,9 @@ class CoinMessenger(object):
 class CoinAcceptor:
     def __init__(self):
         port = find_coin_acceptor()
+        if not port:
+            QApplication.quit()
+            
         coin_validator_connection = make_serial_object(port)
         self.coin_messenger = CoinMessenger(coin_validator_connection)
         self.coin_messenger.set_accept_limit(25)
