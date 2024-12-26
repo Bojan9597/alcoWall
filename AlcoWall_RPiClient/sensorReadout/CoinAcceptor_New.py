@@ -16,7 +16,7 @@ def find_coin_acceptor():
     print(ports)
     print("Finding coin acceptor...")
     for port in ports:
-        if "ttyACM0" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
+        if "ttyACM" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
             return port.device
     return None
     raise Exception("Coin acceptor not found. Ensure it is connected.")
