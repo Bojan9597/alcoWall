@@ -346,9 +346,14 @@ class CoinAcceptor:
         self.coin_messenger.accept_coins(mask=[255, 255])  # Enable all coins
         print("Coin validator enabled. Waiting for coins...")
         self.accept_all_coins()
+        last_status_number = 0
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            last_status_number = status[0]
+            if status and len(status) > 1:
+                last_status_number = status[0]
+            else:
+                #exit application if no coin is inserted
+                exit()
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
                 if status and len(status) > 1 and status[0] != last_status_number:
