@@ -36,7 +36,6 @@ class AlcoholChecked(State):
         self.data_manager = DataManager(DEVICE_ID)
         # Call function to get fun fact and display it
         self.get_fun_fact()
-        alcoWall.next_add_url = self.data_manager.get_ad_url()
     
     def change_current_state_file(self):
         try:

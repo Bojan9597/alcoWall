@@ -64,6 +64,8 @@ class InitialState(State):
                     self.retry_timer.start(1000)  # Retry fetching a valid video
             else:
                 self.download_and_play_video(alcoWall.next_add_url, video_path)
+            alcoWall.next_add_url = self.data_manager.get_ad_url()
+            print(f"Next video URL: {alcoWall.next_add_url}")
         else:
             alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
