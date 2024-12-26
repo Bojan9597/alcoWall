@@ -23,6 +23,7 @@ class AlcoWall(QWidget):
         self.monthly_highscore = 0
         self.highscore = 0
         self.device_id = self.read_device_id()
+        self.next_add_url = None
 
         self.credit = 0
         self.alcohol_level = -1

@@ -46,12 +46,10 @@ class InitialState(State):
 
     def play_next_video(self):
         print("Fetching video...")
-        video_url = self.data_manager.get_ad_url()
-
-        if video_url:
-            video_filename = self.extract_filename_from_url(video_url)
+        if alcoWall.next_add_url:
+            video_filename = self.extract_filename_from_url(alcoWall.next_add_url)
             video_path = os.path.join(self.videos_directory, video_filename)
-            print(f"Video URL: {video_url}")
+            print(f"Video URL: {alcoWall.next_add_url}")
             if os.path.exists(video_path):
                 if not self.is_video_corrupted(video_path):
                     print(f"Playing video: {video_path}")
@@ -62,7 +60,7 @@ class InitialState(State):
                     os.remove(video_path)
                     self.retry_timer.start(1000)  # Retry fetching a valid video
             else:
-                self.download_and_play_video(video_url, video_path)
+                self.download_and_play_video(alcoWall.next_add_url, video_path)
         else:
             alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
