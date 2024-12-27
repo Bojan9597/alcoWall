@@ -10,7 +10,7 @@ if __name__ == "__main__":
     alcoWall.data_manager.fun_fact_signal.connect(alcoWall.get_fun_fact)
     alcoWall.data_manager.get_ad_url()
     alcoWall.data_manager.get_fun_fact()
-    alcoWall.show()
+    alcoWall.showFullScreen()
     #ota testing
     from sensorReadout.SensorVariableUpdates import SensorVariableUpdates
     sensor_variable_updates = SensorVariableUpdates()
