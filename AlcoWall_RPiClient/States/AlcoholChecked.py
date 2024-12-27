@@ -32,8 +32,6 @@ class AlcoholChecked(State):
         alcoWall.workingWidget.lcdCounter.setText("")
         alcoWall.workingWidget.alcoholSensorText.hide()
 
-        # Create an instance of DataManager
-        self.data_manager = DataManager(DEVICE_ID)
         # Call function to get fun fact and display it
         self.get_fun_fact()
     
@@ -47,7 +45,7 @@ class AlcoholChecked(State):
         """
         Fetches a fun fact using DataManager and displays it on the funFactText widget with dynamic font size adjustment.
         """
-        fact_sentence = self.data_manager.get_fun_fact()
+        fact_sentence = alcoWall.fun_fact
         alcoWall.workingWidget.funFactText.setWordWrap(True)  # Enable word wrap
 
         # Set the fun fact text with font adjustment to fit within half the label width

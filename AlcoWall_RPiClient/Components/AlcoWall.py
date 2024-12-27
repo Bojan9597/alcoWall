@@ -7,6 +7,8 @@ from PySide6.QtGui import QPixmap
 from Components.VideoWidget import VideoWidget
 from Constants.GENERALCONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDTH_THAT_PROXIMITY_SENSOR_TEXT_TAKES
 import threading
+from DatabaseManagement.DataManager import DataManager  # Import the DataManager
+from PySide6.QtCore import Slot
 class AlcoWall(QWidget):
     _instance = None
 
@@ -24,6 +26,7 @@ class AlcoWall(QWidget):
         # self.highscore = 0
         self.device_id = self.read_device_id()
         self.next_add_url = None
+        self.fun_fact = None
 
         self.credit = 0
         self.alcohol_level = -1
@@ -67,7 +70,15 @@ class AlcoWall(QWidget):
 
         self._initialized = True
         self.current_state = None
+        self.data_manager = DataManager(self.device_id)
 
+    @Slot(str)
+    def get_ad_url(self, ad_url):
+        self.next_add_url = ad_url
+    
+    @Slot(str)
+    def get_fun_fact(self, fun_fact):
+        self.fun_fact = fun_fact
 
     def update_credit(self, credit):
         """Update the credit value. but thread safe."""

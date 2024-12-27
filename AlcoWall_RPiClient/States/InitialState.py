@@ -21,7 +21,6 @@ class InitialState(State):
         alcoWall.workingWidget.hide()
 
         self.device_id = alcoWall.read_device_id()
-        self.data_manager = DataManager(self.device_id)
         # self.get_highscores()
 
         self.coin_check_timer = QTimer()
@@ -46,9 +45,7 @@ class InitialState(State):
 
     def play_next_video(self):
         print("Fetching video...")
-        if not alcoWall.next_add_url:
-            alcoWall.next_add_url = self.data_manager.get_ad_url()
-
+        alcoWall.data_manager.get_ad_url()
         if alcoWall.next_add_url:
             video_filename = self.extract_filename_from_url(alcoWall.next_add_url)
             video_path = os.path.join(self.videos_directory, video_filename)
@@ -59,7 +56,7 @@ class InitialState(State):
                 self.retry_timer.stop()  # Stop retrying
             else:
                 self.download_and_play_video(alcoWall.next_add_url, video_path)
-            alcoWall.next_add_url = self.data_manager.get_ad_url()
+            alcoWall.next_add_url = alcoWall.data_manager.get_ad_url()
             print(f"Next video URL: {alcoWall.next_add_url}")
         else:
             alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
