@@ -360,6 +360,7 @@ class CoinAcceptor:
         self.accept_all_coins()
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
+            print(status)
             if status and len(status) > 1:
                 last_status_number = status[0]
                 while True:
