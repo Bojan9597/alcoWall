@@ -11,12 +11,22 @@ from struct import unpack
 #test for ota
 def find_coin_acceptor():
     ports = list_ports.comports()
-    print(ports)
-    print("Finding coin acceptor...")
+    print("Available ports:", ports)
+    print("Finding coin acceptor on USB port 1...")
+
     for port in ports:
-        if "ttyACM" in port.device:  # Filters tty devices (e.g., /dev/ttyACM0)
-            return port.device
-    raise Exception("Coin acceptor not found. Ensure it is connected.")
+        # Check the USB port number using the /sys file system
+        try:
+            sys_path = f"/sys/class/tty/{port.name}/device"
+            with open(f"{sys_path}/uevent") as f:
+                details = f.read()
+                if "1-1" in details:  # `1-1` typically represents USB port 1
+                    print(f"Coin acceptor found on: {port.device}")
+                    return port.device
+        except FileNotFoundError:
+            continue
+
+    raise Exception("Coin acceptor not found on USB port 1. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
     if not data:
