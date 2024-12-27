@@ -79,6 +79,7 @@ class AlcoWall(QWidget):
     
     @Slot(str)
     def get_fun_fact(self, fun_fact):
+        print(f"Fun fact: {fun_fact}")
         self.fun_fact = fun_fact
 
     def update_credit(self, credit):
