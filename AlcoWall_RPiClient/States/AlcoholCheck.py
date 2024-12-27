@@ -53,6 +53,7 @@ class AlcoholCheck(State):
 
         # Create an instance of DataManager
         self.data_manager = DataManager(DEVICE_ID)
+        self.data_manager.get_fun_fact()
     
     def change_current_state_file(self):
         try:
