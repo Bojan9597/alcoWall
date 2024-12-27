@@ -381,7 +381,14 @@ class CoinAcceptor:
                         coin_validator_connection = make_serial_object(port)
                         self.coin_messenger = CoinMessenger(coin_validator_connection)
                         self.coin_messenger.set_accept_limit(25)
-                        print("Reconnected to coin acceptor.")
+                        
+                        # Clear any buffered coins to avoid processing old events
+                        buffered_coins = self.coin_messenger.read_buffer()
+                        print(f"Cleared buffered coins after reconnection: {buffered_coins}")
+
+                        # Reset the coin acceptor to accept coins again
+                        self.accept_all_coins()
+                        print("Reconnected and coin acceptor reset.")
                     except Exception as e:
                         print(f"Error reconnecting to coin acceptor: {e}")
                         time.sleep(5)  # Wait before retrying
@@ -395,13 +402,14 @@ class CoinAcceptor:
 
                     if coin_value is not None:
                         print(f"Coin inserted: {coin_value}")
-                        self.update_credit(coin_value)                    
+                        self.update_credit(coin_value)
 
                 time.sleep(0.3)  # Adjust polling interval for performance
 
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
-            return 
+            return
+
 
 
 
