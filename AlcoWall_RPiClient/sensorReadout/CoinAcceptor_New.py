@@ -370,6 +370,7 @@ class CoinAcceptor:
 
                     if status and len(status) > 1 and status[0] != last_status_number:
                         print(status)
+                        print()
                         last_status_number = status[0]
                         coin_code = status[1]  # Coin ID received
                         coin_value = self.coin_dic.get(coin_code, None)
