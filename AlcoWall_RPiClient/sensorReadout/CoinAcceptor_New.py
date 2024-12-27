@@ -360,19 +360,27 @@ class CoinAcceptor:
         self.accept_all_coins()
         try:
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            last_status_number = status[0]
-            while True:
-                status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-                if status and len(status) > 1 and status[0] != last_status_number:
-                    last_status_number = status[0]
-                    coin_code = status[1]  # Coin ID received
-                    coin_value = self.coin_dic.get(coin_code, None)
-                    if coin_value is not None:
-                        print(f"Coin inserted: {coin_value}")
-                        self.update_credit(coin_value)
-                        
+            if status and len(status) > 1:
+                last_status_number = status[0]
+                while True:
+                    status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
+                    if status and len(status) > 1 and status[0] != last_status_number:
+                        last_status_number = status[0]
+                        coin_code = status[1]  # Coin ID received
+                        coin_value = self.coin_dic.get(coin_code, None)
+                        if coin_value is not None:
+                            print(f"Coin inserted: {coin_value}")
+                            self.update_credit(coin_value)
+                    else:
+                        port = find_coin_acceptor()
+                        coin_validator_connection = make_serial_object(port)
+                        self.coin_messenger = CoinMessenger(coin_validator_connection)
+                        self.coin_messenger.set_accept_limit(25)
+                        time.sleep(5)
+                        return self.get_coin_type()
+                            
 
-                time.sleep(0.1)  # Adjust polling interval for performance
+                    time.sleep(0.8)  # Adjust polling interval for performance
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
             return
