@@ -382,7 +382,7 @@ class CoinAcceptor:
                         print(f"Coin inserted: {coin_value}")
                         self.update_credit(coin_value)
 
-                elif not status:  # Handle when no valid status is received
+                else:  # Handle when no valid status is received
                     print("Coin acceptor not responding. Attempting reconnection...")
                     try:
                         # Attempt to reconnect to the coin acceptor
