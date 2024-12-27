@@ -63,7 +63,8 @@ def update_repository(branch_name):
 
 def start_script():
     with open("testFiles/HowMuchItFalls.txt", "r+") as file:
-        a = int(file.readline())
+        a = file.read().strip()
+        a = int(a)
         a += 1
         file.write(str(a))
 
