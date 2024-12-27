@@ -60,7 +60,9 @@ class DataManager(QObject):
             try:
                 response = requests.post("https://node.alkowall.indigoingenium.ba/facts/general_fact")
                 if response.status_code == 200:
+                    print(response.json())
                     fact_data = response.json()
+                    fact_sentence = ""
                     if isinstance(fact_data, list) and len(fact_data) > 0:
                         fact_sentence = fact_data[0].get("sentence", fallback_fact)
                     elif isinstance(fact_data, dict):
