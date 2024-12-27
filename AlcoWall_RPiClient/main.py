@@ -6,7 +6,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     alcoWall = AlcoWall()
-    alcoWall.showFullScreen()
+    alcoWall.show()
     #ota testing
     from sensorReadout.SensorVariableUpdates import SensorVariableUpdates
     sensor_variable_updates = SensorVariableUpdates()
