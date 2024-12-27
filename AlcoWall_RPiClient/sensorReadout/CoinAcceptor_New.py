@@ -315,70 +315,80 @@ class CoinMessenger(object):
         return reply_msg
       
 
+import time
+import threading
+
 class CoinAcceptor:
     def __init__(self):
         port = find_coin_acceptor()
         coin_validator_connection = make_serial_object(port)
         self.coin_messenger = CoinMessenger(coin_validator_connection)
         self.coin_messenger.set_accept_limit(25)
-        self.credit = 0
+
+        # Maps coin codes (the second byte from coin acceptor) to integer values
         self.coin_dic = {4: 100, 1: 10, 2: 20, 3: 50, 5: 200, 6: 500}
+        
+        self.credit = 0
+        self.credit_lock = threading.Lock()
+        
+        # Keep track of events we’ve processed to avoid double-counting
+        self.processed_status_numbers = set()
 
     def reject_all_coins(self):
-        """Send command to the coin acceptor to reject all coins."""
+        """Disables coin acceptance."""
         try:
-            self.coin_messenger.master_inhibit(state=True)  # Disable coin acceptance
+            self.coin_messenger.master_inhibit(state=True)
             print("Coin acceptor is now rejecting all coins.")
         except Exception as e:
             print(f"Error rejecting all coins: {e}")
 
     def accept_all_coins(self):
-        """Send command to the coin acceptor to accept all coins."""
+        """Enables coin acceptance."""
         try:
-            self.coin_messenger.master_inhibit(state=False)  # Enable coin acceptance
+            self.coin_messenger.master_inhibit(state=False)
             print("Coin acceptor is now accepting all coins.")
         except Exception as e:
             print(f"Error accepting all coins: {e}")
 
     def get_credit(self):
-        with threading.Lock():
+        with self.credit_lock:
             return self.credit
         
-    def update_credit(self, credit):
-        with threading.Lock():
-            self.credit += credit
-            print(f"Credit: {self.credit}")
+    def update_credit(self, amount):
+        with self.credit_lock:
+            self.credit += amount
+            print(f"Credit updated by {amount}, total is now {self.credit}")
 
-    def set_credit(self, credit):
-        with threading.Lock():
-            self.credit = credit
+    def set_credit(self, amount):
+        with self.credit_lock:
+            self.credit = amount
 
     def get_coin_type(self):
         """
         Continuously polls the coin acceptor for new coins. If the hardware becomes
         unresponsive, it attempts to reconnect. Once reconnected, it re-enables
-        coin acceptance and clears any stale data so new coins will be processed.
+        coin acceptance and clears any stale data so that newly inserted coins 
+        are always processed exactly once.
         """
-        # Always enable coin acceptance first.
-        self.coin_messenger.accept_coins(mask=[255, 255])  # Enable acceptance of all coin types
+        print("Initializing coin acceptor...")
+        self.coin_messenger.accept_coins(mask=[255, 255])
         self.accept_all_coins()
         print("Coin validator enabled. Waiting for coins...")
 
         try:
-            # Attempt an initial read to get a starting status reference.
+            # Perform an initial read
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            print("Initial status:", status)
-            last_status_number = status[0] if status and len(status) > 1 else None
+            if status and len(status) > 1:
+                self.processed_status_numbers.add(status[0])  # Mark the first event as “processed”
+            print("Initial status read:", status)
 
             while True:
-                # Read until hardware returns no more data or becomes unresponsive.
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
-                # -------------------------------------------------------------
-                # 1) Hardware Unresponsive or No Data
-                # -------------------------------------------------------------
+                # ----------------------------------------------------------------
+                # 1) Hardware Unresponsive or `status` is invalid
+                # ----------------------------------------------------------------
                 if not status:
-                    # Temporarily reject coins to prevent acceptance in a broken state
                     self.reject_all_coins()
                     print("Coin acceptor not responding. Attempting reconnection...")
 
@@ -389,63 +399,60 @@ class CoinAcceptor:
                         self.coin_messenger = CoinMessenger(coin_validator_connection)
                         self.coin_messenger.set_accept_limit(25)
 
-                        # Clear any stale data that might be buffered
-                        stale_data = self.coin_messenger.read_buffer()
-                        print(f"Cleared stale data after reconnection: {stale_data}")
+                        # Clear stale data that might be in the buffer
+                        _ = self.coin_messenger.read_buffer()
 
                         # Re-enable acceptance
                         self.coin_messenger.accept_coins(mask=[255, 255])
                         self.accept_all_coins()
                         print("Reconnected and coin acceptor reset.")
-                        
-                        # Fetch a fresh status
-                        status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-                        last_status_number = status[0] if status and len(status) > 1 else None
+
+                        # Reset processed events set (hardware state has been reset)
+                        self.processed_status_numbers.clear()
 
                     except Exception as e:
                         print(f"Error reconnecting to coin acceptor: {e}")
-                        time.sleep(5)  # Wait before retry
-                        continue
+                        time.sleep(3)
+                        continue  # Retry on next loop
 
-                # -------------------------------------------------------------
-                # 2) Valid New Status
-                # -------------------------------------------------------------
+                # ----------------------------------------------------------------
+                # 2) Valid response from the hardware
+                # ----------------------------------------------------------------
                 elif status and len(status) > 1:
-                    # If this is a *new* status (compared to last_status_number)
-                    if status[0] != last_status_number:
-                        last_status_number = status[0]
-                        coin_code = status[1]
-                        coin_value = self.coin_dic.get(coin_code, None)
+                    # Drain the hardware buffer so we don't miss multiple coins
+                    self._drain_coin_buffer(status)
 
-                        if coin_value is not None:
-                            print(f"Coin inserted: {coin_value}")
-                            self.update_credit(coin_value)
-
-                        # Keep reading in a short inner loop in case multiple coins 
-                        # have been buffered. We break out once no new data is found.
-                        while True:
-                            follow_up = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-                            if follow_up and len(follow_up) > 1 and follow_up[0] != last_status_number:
-                                last_status_number = follow_up[0]
-                                coin_code = follow_up[1]
-                                coin_value = self.coin_dic.get(coin_code, None)
-                                if coin_value is not None:
-                                    print(f"Coin inserted: {coin_value}")
-                                    self.update_credit(coin_value)
-                            else:
-                                # No more new data in buffer
-                                break
-                
-                # Pause briefly before next poll to reduce CPU usage
-                time.sleep(0.3)
+                # Sleep briefly to reduce load and let hardware settle
+                time.sleep(0.2)
 
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
-            return
 
+    def _drain_coin_buffer(self, first_status):
+        """
+        Reads from the buffer repeatedly until no new events appear.
+        `first_status` is the initial valid response to process.
+        """
+        # We will keep reading until status is invalid or we've read everything.
+        status = first_status
+        while status and len(status) > 1:
+            status_number = status[0]
+            coin_code     = status[1]
 
+            # If we haven't seen this status number before, it's a new event
+            if status_number not in self.processed_status_numbers:
+                self.processed_status_numbers.add(status_number)
 
+                # If recognized coin code, update credit
+                coin_value = self.coin_dic.get(coin_code)
+                if coin_value:
+                    print(f"Detected coin code {coin_code}; value = {coin_value}")
+                    self.update_credit(coin_value)
+                else:
+                    print(f"Unknown coin code: {coin_code}")
 
+            # Attempt next read
+            status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
 
 
