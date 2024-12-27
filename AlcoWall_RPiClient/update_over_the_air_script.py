@@ -97,7 +97,6 @@ def check_if_current_state_is_initial():
                 return file.read().strip() == "InitialState"
         except FileNotFoundError:
             pass
-#test for otaaa
 def main():
     """Main loop to check for updates while ensuring the script runs even without internet."""
     device_id = read_device_id()
