@@ -63,20 +63,11 @@ def update_repository(branch_name):
 
 def start_script():
     with open("testFiles/HowMuchItFalls.txt", "r+") as file:
-        # Read the current value
-        a_str = file.readline().strip()
-        a = int(a_str)
-        
-        # Increment the value
-        a += 1
-        print(a)
-        
-        # Move file pointer back to the beginning and truncate the file
-        file.seek(0)
-        file.truncate()
-        
-        # Write only the new value
-        file.write(str(a))
+        a = int(file.read().strip())  # Read and convert to integer
+        a += 1  # Increment the value
+        file.seek(0)  # Go back to the start of the file
+        file.truncate()  # Clear the file contents
+        file.write(str(a))  # Write the updated value
 
     """Start the Python script using the appropriate Python interpreter."""
     if platform.system() == "Linux" and platform.machine() in ("armv7l", "armv6l", "aarch64"):
