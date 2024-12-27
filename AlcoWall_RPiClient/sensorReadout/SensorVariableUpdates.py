@@ -38,23 +38,13 @@ class SensorVariableUpdates:
             threading.Event().wait(1)
 
     def check_variable_updates(self):
-        if self.coinAcceptor:
-            if self.coinAcceptor.get_credit() > 0:
-                alcoWall.update_credit(self.coinAcceptor.get_credit())
-                print(f"Credit: {alcoWall.get_credit()}")
-                self.coinAcceptor.set_credit(0)
+        if self.coinAcceptor and self.coinAcceptor.get_credit() > 0:
+            alcoWall.update_credit(self.coinAcceptor.get_credit())
+            print(f"Credit: {alcoWall.get_credit()}")
+            self.coinAcceptor.set_credit(0)
 
         if self.alcoholSensor:
             alcoWall.update_alcohol_level(self.alcoholSensor.get_alcohol_level())
-        else:
-            try:
-                with open("testFiles/alcoholCheck.txt", "r") as file:
-                    content = file.readlines()
-                    content = [line.strip() for line in content]
-                if content != "" and content[0] == "yes":
-                    alcoWall.update_alcohol_level(float(content[1]))
-            except FileNotFoundError:
-                pass
 
         # Checking errors
         try:
@@ -71,7 +61,7 @@ class SensorVariableUpdates:
         @brief Writes the results of the alcohol check to a JSON file.
         """
         data = {
-            "device_id": 1,  # Replace with actual device ID if needed
+            "device_id": alcoWall.device_id,  # Replace with actual device ID if needed
             "cash_value": credit,
             "date": datetime.now().isoformat()  # Use current timestamp
         }
@@ -102,7 +92,7 @@ class SensorVariableUpdates:
                 data = json.loads(line)
                 # Store device_id, alcohol_level, and timestamp
                 self.coin_insertions.append({
-                    "device_id": DEVICE_ID,
+                    "device_id": alcoWall.device_id,
                     "cash_value": credit,
                     "date": data["date"]
                 })
