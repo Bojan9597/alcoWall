@@ -372,17 +372,8 @@ class CoinAcceptor:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
                 # Check if a new coin event is detected
-                if status and len(status) > 1 and status[0] != last_status_number:
-                    print(f"Received new status: {status}")
-                    last_status_number = status[0]  # Update last status number
-                    coin_code = status[1]  # Coin ID received
-                    coin_value = self.coin_dic.get(coin_code, None)
-
-                    if coin_value is not None:
-                        print(f"Coin inserted: {coin_value}")
-                        self.update_credit(coin_value)
-
-                else:  # Handle when no valid status is received
+                if not status:
+                    self.reject_all_coins()
                     print("Coin acceptor not responding. Attempting reconnection...")
                     try:
                         # Attempt to reconnect to the coin acceptor
@@ -396,7 +387,17 @@ class CoinAcceptor:
                         time.sleep(5)  # Wait before retrying
                         continue  # Retry connection in the next iteration
 
-                time.sleep(0.8)  # Adjust polling interval for performance
+                elif status and len(status) > 1 and status[0] != last_status_number:
+                    print(f"Received new status: {status}")
+                    last_status_number = status[0]  # Update last status number
+                    coin_code = status[1]  # Coin ID received
+                    coin_value = self.coin_dic.get(coin_code, None)
+
+                    if coin_value is not None:
+                        print(f"Coin inserted: {coin_value}")
+                        self.update_credit(coin_value)                    
+
+                time.sleep(0.3)  # Adjust polling interval for performance
 
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
