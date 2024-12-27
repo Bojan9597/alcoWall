@@ -359,45 +359,49 @@ class CoinAcceptor:
         self.accept_all_coins()
 
         try:
+            # Initial status fetch
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
             print(status)
 
             if status and len(status) > 1:
                 last_status_number = status[0]
+            else:
+                last_status_number = None
 
-                while True:
-                    print("hi")
-                    status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
+            while True:  # Main loop for coin detection
+                status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
-                    if status and len(status) > 1 and status[0] != last_status_number:
-                        print(status)
-                        print()
-                        last_status_number = status[0]
-                        coin_code = status[1]  # Coin ID received
-                        coin_value = self.coin_dic.get(coin_code, None)
+                # Check if a new coin event is detected
+                if status and len(status) > 1 and status[0] != last_status_number:
+                    print(f"Received new status: {status}")
+                    last_status_number = status[0]  # Update last status number
+                    coin_code = status[1]  # Coin ID received
+                    coin_value = self.coin_dic.get(coin_code, None)
 
-                        if coin_value is not None:
-                            print(f"Coin inserted: {coin_value}")
-                            self.update_credit(coin_value)
+                    if coin_value is not None:
+                        print(f"Coin inserted: {coin_value}")
+                        self.update_credit(coin_value)
 
-                    elif not status:  # Handle when status is False
-                        print("Coin acceptor not responding. Attempting reconnection...")
-                        try:
-                            port = find_coin_acceptor()
-                            coin_validator_connection = make_serial_object(port)
-                            self.coin_messenger = CoinMessenger(coin_validator_connection)
-                            self.coin_messenger.set_accept_limit(25)
-                            print("Reconnected to coin acceptor.")
-                        except Exception as e:
-                            print(f"Error reconnecting to coin acceptor: {e}")
-                            time.sleep(5)  # Wait before retrying
-                            continue  # Retry connection in the next iteration
-                    
-                    time.sleep(0.8)  # Adjust polling interval for performance
+                elif not status:  # Handle when no valid status is received
+                    print("Coin acceptor not responding. Attempting reconnection...")
+                    try:
+                        # Attempt to reconnect to the coin acceptor
+                        port = find_coin_acceptor()
+                        coin_validator_connection = make_serial_object(port)
+                        self.coin_messenger = CoinMessenger(coin_validator_connection)
+                        self.coin_messenger.set_accept_limit(25)
+                        print("Reconnected to coin acceptor.")
+                    except Exception as e:
+                        print(f"Error reconnecting to coin acceptor: {e}")
+                        time.sleep(5)  # Wait before retrying
+                        continue  # Retry connection in the next iteration
+
+                time.sleep(0.8)  # Adjust polling interval for performance
 
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
-            return
+            return 
+
 
 
 
