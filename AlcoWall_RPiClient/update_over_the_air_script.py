@@ -66,6 +66,7 @@ def start_script():
         a = file.readline().strip()
         a = int(a)
         a += 1
+        print(a)
         file.write(str(a))
 
     """Start the Python script using the appropriate Python interpreter."""
