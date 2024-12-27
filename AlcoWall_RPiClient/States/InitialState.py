@@ -64,7 +64,7 @@ class InitialState(State):
         else:
             alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
-
+#ota test
     def download_and_play_video(self, video_url, save_path):
         try:
             response = requests.get(video_url, stream=True)

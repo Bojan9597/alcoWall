@@ -6,7 +6,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     alcoWall = AlcoWall()
-    alcoWall.show()
+    alcoWall.showFullScreen()
     from sensorReadout.SensorVariableUpdates import SensorVariableUpdates
     sensor_variable_updates = SensorVariableUpdates()
     from States.InitialState import InitialState
