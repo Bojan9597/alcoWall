@@ -19,9 +19,9 @@ class AlcoWall(QWidget):
         if hasattr(self, '_initialized') and self._initialized:
             return
         super().__init__()
-        self.weekly_highscore = 0
-        self.monthly_highscore = 0
-        self.highscore = 0
+        # self.weekly_highscore = 0
+        # self.monthly_highscore = 0
+        # self.highscore = 0
         self.device_id = self.read_device_id()
         self.next_add_url = None
 
