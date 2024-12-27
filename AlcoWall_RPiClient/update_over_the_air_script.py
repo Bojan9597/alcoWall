@@ -62,7 +62,7 @@ def update_repository(branch_name):
     subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
 
 def start_script():
-    with open("test_files/HowMuchItFalls.txt", "w+") as file:
+    with open("testFiles/HowMuchItFalls.txt", "w+") as file:
         a = int(file.read())
         a += 1
         file.write(str(a))
