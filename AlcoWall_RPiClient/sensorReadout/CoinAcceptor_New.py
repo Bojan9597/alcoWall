@@ -366,6 +366,7 @@ class CoinAcceptor:
                 last_status_number = status[0]
 
                 while True:
+                    print("hi")
                     status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
                     if status and len(status) > 1 and status[0] != last_status_number:
