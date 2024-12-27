@@ -65,14 +65,6 @@ class AlcoholCheck(State):
         """
         Handles the successful detection of alcohol levels.
         """
-        # Process the alcohol measurement
-        # highscores = self.data_manager.process_alcohol_measurement(alcoWall.alcohol_level_to_show)
-
-        # # Update alcoWall's highscore variables
-        # alcoWall.weekly_highscore = highscores.get("weekly_highscore", 0.0)
-        # alcoWall.monthly_highscore = highscores.get("monthly_highscore", 0.0)
-        # alcoWall.highscore = highscores.get("highscore", 0.0)
-
         from States.AlcoholChecked import AlcoholChecked
         return AlcoholChecked()  # Transition to AlcoholChecked state
 
