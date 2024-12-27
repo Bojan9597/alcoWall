@@ -38,11 +38,11 @@ class DataManager(QObject):
                     if ad_url:
                         self.ad_url_signal.emit(ad_url)
                     else:
-                        self.ad_url_signal.emit("No ad URL found.")
+                        self.ad_url_signal.emit("No ad URL found. failed to fetch. Error.")
                 else:
-                    self.ad_url_signal.emit(f"Failed to fetch ad URL. Status code: {response.status_code}")
+                    self.ad_url_signal.emit(f"Failed to fetch ad URL. Status code: {response.status_code}. Error.")
             except requests.RequestException as e:
-                self.ad_url_signal.emit(f"Request to fetch ad URL failed: {e}")
+                self.ad_url_signal.emit(f"Request to fetch ad URL failed: {e} Error.")
         
         # Run in a separate daemon thread
         thread = Thread(target=fetch_ad_url)
@@ -70,9 +70,9 @@ class DataManager(QObject):
 
                     self.fun_fact_signal.emit(fact_sentence)
                 else:
-                    self.fun_fact_signal.emit(f"Failed to fetch fun fact. Status code: {response.status_code}")
+                    self.fun_fact_signal.emit(fallback_fact)
             except requests.RequestException as e:
-                self.fun_fact_signal.emit(f"Error fetching fun fact: {e}")
+                self.fun_fact_signal.emit(fallback_fact)
         
         # Run in a separate daemon thread
         thread = Thread(target=fetch_fun_fact)

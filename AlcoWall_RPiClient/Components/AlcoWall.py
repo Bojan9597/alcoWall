@@ -74,7 +74,8 @@ class AlcoWall(QWidget):
 
     @Slot(str)
     def get_ad_url(self, ad_url):
-        self.next_add_url = ad_url
+        if "Error" not in ad_url:
+            self.next_add_url = ad_url
     
     @Slot(str)
     def get_fun_fact(self, fun_fact):
