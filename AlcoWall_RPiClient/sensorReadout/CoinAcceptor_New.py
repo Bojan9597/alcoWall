@@ -369,6 +369,7 @@ class CoinAcceptor:
                     status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
                     if status and len(status) > 1 and status[0] != last_status_number:
+                        print(status)
                         last_status_number = status[0]
                         coin_code = status[1]  # Coin ID received
                         coin_value = self.coin_dic.get(coin_code, None)
