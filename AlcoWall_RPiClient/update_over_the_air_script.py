@@ -62,6 +62,11 @@ def update_repository(branch_name):
     subprocess.run(["git", "reset", "--hard", f"origin/{branch_name}"], cwd=REPO_PATH, capture_output=True, text=True)
 
 def start_script():
+    with open("test_files/HowMuchItFalls.txt", "w+") as file:
+        a = int(file.read())
+        a += 1
+        file.write(str(a))
+
     """Start the Python script using the appropriate Python interpreter."""
     if platform.system() == "Linux" and platform.machine() in ("armv7l", "armv6l", "aarch64"):
         # On Raspberry Pi, use the virtual environment Python interpreter
