@@ -16,7 +16,7 @@ def find_coin_acceptor():
         print(f"  {port.device} - {port.description}")
 
     print("Finding coin acceptor on USB Port 3...")
-
+#test ota
     for port in ports:
         # Match the description for USB-UART LP
         if "USB-UART LP" in port.description:
