@@ -14,24 +14,23 @@ def find_coin_acceptor():
     print("Available ports:")
     for port in ports:
         print(f"  {port.device} - {port.description}")
-    
+
     print("Finding coin acceptor on USB Port 3...")
 
     for port in ports:
         # Construct the path to the sysfs device folder
         sys_path = f"/sys/class/tty/{port.name}/device"
-        
         try:
-            # Check if the port corresponds to the desired USB hub and port
+            # Check if the port corresponds to USB Port 3
             with open(os.path.join(sys_path, "uevent")) as uevent_file:
                 uevent_data = uevent_file.read()
-                if "1-1.1.3" in uevent_data:  # USB Bus 01, Port 1.1.3 corresponds to Port 3 on the hub
+                if "1-1.1.3" in uevent_data:  # USB hierarchy for Port 3
                     print(f"Coin acceptor found: {port.device}")
                     return port.device
         except FileNotFoundError:
-            # If the sysfs file is missing, skip this port
+            # Skip ports without sysfs entries
             continue
-    
+
     raise Exception("Coin acceptor not found on USB Port 3. Ensure it is connected.")
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
