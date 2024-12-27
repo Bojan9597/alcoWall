@@ -7,6 +7,7 @@ if __name__ == "__main__":
 
     alcoWall = AlcoWall()
     alcoWall.showFullScreen()
+    #ota testing
     from sensorReadout.SensorVariableUpdates import SensorVariableUpdates
     sensor_variable_updates = SensorVariableUpdates()
     from States.InitialState import InitialState
