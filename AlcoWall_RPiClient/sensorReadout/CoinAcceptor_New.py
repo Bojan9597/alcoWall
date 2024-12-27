@@ -27,6 +27,9 @@ def find_coin_acceptor():
         if port.device == "/dev/ttyACM1":
             print(f"Coin acceptor found: {port.device}")
             return port.device
+        if port.device == "/dev/ttyUSB0":
+            print(f"Coin acceptor found: {port.device}")
+            return port.device
 
     raise Exception("Coin acceptor not found on USB Port 3. Ensure it is connected.")
 
