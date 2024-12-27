@@ -401,7 +401,7 @@ class CoinAcceptor:
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
             return 
-#test ota
+
 
 
 
