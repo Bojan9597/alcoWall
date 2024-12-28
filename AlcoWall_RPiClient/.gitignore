@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 
 # Ignore all .mp4 files
-*.mp4
+# *.mp4
 
 # ignore all .json files
 *.json
