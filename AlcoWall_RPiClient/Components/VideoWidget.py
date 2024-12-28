@@ -73,19 +73,18 @@ class VideoWidget(QWidget):
 #ota test
     def update_frame(self):
         try:
-            frame = self.cap.get_next_data()
+            self.frame = self.cap.get_next_data()
         except IndexError:
             # If the video has ended, reset the frame position to loop
             self.video_finished.emit()
             self.cap.set_image_index(0)  # Reset to the first frame
-            frame = self.cap.get_next_data()
+            self.frame = self.cap.get_next_data()
         except Exception as e:
             self.video_finished.emit()
             self.cap.set_image_index(0)  # Reset to the first frame
-            frame = self.cap.get_next_data()
+            self.frame = self.cap.get_next_data()
             print(f"Error reading video frame: {e}")
 
-        self.frame = frame
         self.repaint()
 
     def paintEvent(self, event):
