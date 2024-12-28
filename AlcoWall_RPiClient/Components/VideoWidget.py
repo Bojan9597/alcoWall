@@ -96,7 +96,7 @@ class VideoWidget(QWidget):
                 qt_image = QImage(frame_rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
                 painter = QPainter(self)
-                painter.drawImage(0, 0, qt_image.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))    
+                painter.drawImage(0, 0, qt_image)    
         except Exception as e:
             print(f"Error painting video frame: {e}")
 

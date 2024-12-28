@@ -1,5 +1,5 @@
-VIDEO_WIDTH = 600
-VIDEO_HEIGHT = 400
+VIDEO_WIDTH = 1866
+VIDEO_HEIGHT = 1026
 COUNTER_FOR_ALCOHOL_MEASURING = 10
 ERROR_TO_MUCH_TIME_IN_ALCOHOL_CHECK = 100
 BASE_URL = "https://node.alkowall.indigoingenium.ba"  # Intentional wrong URL for retry testing
