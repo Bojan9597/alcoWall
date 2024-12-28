@@ -66,7 +66,7 @@ class InitialState(State):
             if response.status_code == 200:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 with open(save_path, 'wb') as video_file:
-                    for chunk in response.iter_content(chunk_size=1024):
+                    for chunk in response.iter_content(chunk_size=VIDEO_WIDTH):
                         if chunk:
                             video_file.write(chunk)
                 print(f"Video downloaded successfully and saved to {save_path}")
