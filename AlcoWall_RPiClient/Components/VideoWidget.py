@@ -69,7 +69,7 @@ class VideoWidget(QWidget):
         # Open the video using imageio
         self.cap = imageio.get_reader(video_path)
         self.frame_rate = self.cap.get_meta_data()['fps']
-        self.timer.start((1000 // self.frame_rate)//6)  # Targeting approximately 30 FPS
+        self.timer.start((1000 // self.frame_rate))  # Targeting approximately 30 FPS
 #ota test
     def update_frame(self):
         try:
