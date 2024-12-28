@@ -9,7 +9,8 @@ from Constants.GENERALCONSTANTS import DEVICE_ID_FILE, PERCENTAGE_OF_SCREEN_WIDT
 import threading
 from DatabaseManagement.DataManager import DataManager  # Import the DataManager
 from PySide6.QtCore import Slot
-class AlcoWall(QWidget):
+from PySide6.QtWidgets import QMainWindow
+class AlcoWall(QMainWindow):
     _instance = None
 
     def __new__(cls, *args, **kwargs):
