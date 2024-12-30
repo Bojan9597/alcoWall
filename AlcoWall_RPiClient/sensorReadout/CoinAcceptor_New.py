@@ -375,7 +375,7 @@ class CoinAcceptor(QObject):
             try:
                 # Read the buffered credit or error codes
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-
+                print("status: ", status)
                 # Handle invalid or unresponsive hardware
                 if not status:
                     print("No response from coin acceptor. Attempting to reconnect...")
