@@ -13,6 +13,7 @@ alcoWall = AlcoWall()
 
 class SensorVariableUpdates(QObject):
     def __init__(self):
+        super().__init__()
         self.alcoholSensor = None
         self.coin_insertions = []
         self.coinAcceptor = None

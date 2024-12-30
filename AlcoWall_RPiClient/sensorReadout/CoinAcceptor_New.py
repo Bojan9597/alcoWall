@@ -331,6 +331,7 @@ from PySide6.QtCore import QObject, Signal
 class CoinAcceptor(QObject):
     CoinAcceptedSignal = Signal(int)
     def __init__(self):
+        super().__init__()
         port = find_coin_acceptor()
         coin_validator_connection = make_serial_object(port)
         self.coin_messenger = CoinMessenger(coin_validator_connection)
