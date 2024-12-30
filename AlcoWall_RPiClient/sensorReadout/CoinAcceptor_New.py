@@ -390,8 +390,7 @@ class CoinAcceptor(QObject):
         try:
             # Perform an initial read
             status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            if status and len(status) > 1:
-                self.processed_status_numbers.add(status[0])  # Mark the first event as “processed”
+            last_status_number = status[0] if status and len(status) >= 1 else None
             print("Initial status read:", status)
 
             while True:
@@ -431,6 +430,12 @@ class CoinAcceptor(QObject):
                 # 2) Valid response from the hardware
                 # ----------------------------------------------------------------
                 elif status and len(status) > 1:
+                    if last_status_number != status[0]:
+                        coin_code     = status[1]
+                        coin_value = self.coin_dic.get(coin_code)
+                        self.CoinAcceptedSignal.emit(coin_value)
+                        print("Status read:", status)
+                        last_status_number = status[0]
                     # Drain the hardware buffer so we don't miss multiple coins
                     self._drain_coin_buffer(status)
 
