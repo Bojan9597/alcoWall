@@ -155,11 +155,11 @@ class AlcoWall(QMainWindow):
             self.credit += credit
             # Update the credit display labels
             # Ensure that 'creditLabel' exists in your UI and is correctly named
-            credit_label = self.ui.findChild(QLabel, "creditLabel")
-            if credit_label:
-                credit_label.setText(f"Credit: {round(self.credit / 100, 2)}")
-            else:
-                print("Warning: 'creditLabel' not found in UI.")
+            # credit_label = self.ui.findChild(QLabel, "creditLabel")
+            # if credit_label:
+            #     credit_label.setText(f"Credit: {round(self.credit / 100, 2)}")
+            # else:
+            #     print("Warning: 'creditLabel' not found in UI.")
             
             # Update the credit label in the working widget
             if hasattr(self.workingWidget, 'coinLabelText'):
