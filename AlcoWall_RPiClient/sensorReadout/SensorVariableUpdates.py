@@ -27,10 +27,10 @@ class SensorVariableUpdates:
             self.alcoholSensorThread = threading.Thread(target=self.alcoholSensor.run, daemon=True)
             self.alcoholSensorThread.start()
 
-            from sensorReadout.CoinAcceptor_New import CoinAcceptor
-            self.coinAcceptor = CoinAcceptor()
-            self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
-            self.coin_thread.start()
+        from sensorReadout.CoinAcceptor_New import CoinAcceptor
+        self.coinAcceptor = CoinAcceptor()
+        self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
+        self.coin_thread.start()
 
     def run_sensor_updates(self):
         while True:
