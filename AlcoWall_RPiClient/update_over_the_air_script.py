@@ -12,7 +12,7 @@ REPO_PATH = os.getcwd()
 SCRIPT_PATH = os.path.join(REPO_PATH, "../AlcoWall_RPiClient", "main.py")
 
 # Path to the virtual environment's Python interpreter for Raspberry Pi
-VENV_PYTHON = "/home/bojan/AlcoWallEnvironment/bin/python3"
+VENV_PYTHON = "/home/bojan/Desktop/AlcoWallEnvironment/bin/python3"
 
 def read_device_id():
     """Read the device ID from the device_id.txt file."""
