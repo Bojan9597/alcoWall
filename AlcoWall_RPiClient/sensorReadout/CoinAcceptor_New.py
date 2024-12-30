@@ -424,7 +424,7 @@ class CoinAcceptor(QObject):
                     # Drain the hardware buffer so we don't miss multiple coins
 
                 # Sleep briefly to reduce load and let hardware settle
-                time.sleep(0.2)
+                time.sleep(0.5)
 
         except KeyboardInterrupt:
             print("Exiting coin listening loop.")
