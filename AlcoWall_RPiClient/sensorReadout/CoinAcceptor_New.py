@@ -419,12 +419,6 @@ class CoinAcceptor(QObject):
                 time.sleep(2)  # Pause before retrying
                 continue
 
-        except Exception as e:
-            print(f"Unexpected error: {e}. Retrying...")
-            time.sleep(3)  # Wait before retrying
-            continue
-
-
     def _drain_coin_buffer(self, first_status):
         """
         Reads from the buffer repeatedly until no new events appear.
