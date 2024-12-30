@@ -332,9 +332,6 @@ class CoinAcceptor(QObject):
         self.credit = 0
         self.credit_lock = threading.Lock()
         
-        # Keep track of events we’ve processed to avoid double-counting
-        self.processed_status_numbers = set()
-
     def reject_all_coins(self):
         """Disables coin acceptance."""
         try:
@@ -372,14 +369,15 @@ class CoinAcceptor(QObject):
         self.coin_messenger.accept_coins(mask=[255, 255])
         self.accept_all_coins()
         print("Coin validator enabled. Waiting for coins...")
-
         last_status_number = None
+        status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
+        last_status_number = status[0] if status else last_status_number
+        
 
         while True:
             try:
                 # Read the buffered credit or error codes
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-                print(status)
                 # Handle invalid or unresponsive hardware
                 if not status:
                     print("No response from coin acceptor. Attempting to reconnect...")
@@ -421,35 +419,6 @@ class CoinAcceptor(QObject):
                 print(f"Serial exception: {e}. Reinitializing connection...")
                 time.sleep(2)  # Pause before retrying
                 continue
-
-    def _drain_coin_buffer(self, first_status):
-        """
-        Reads from the buffer repeatedly until no new events appear.
-        `first_status` is the initial valid response to process.
-        """
-        # We will keep reading until status is invalid or we've read everything.
-        status = first_status
-        while status and len(status) > 1:
-            status_number = status[0]
-            coin_code     = status[1]
-
-            # If we haven't seen this status number before, it's a new event
-            if status_number not in self.processed_status_numbers:
-                self.processed_status_numbers.add(status_number)
-
-                # If recognized coin code, update credit
-                coin_value = self.coin_dic.get(coin_code)
-                print(f"Detected coin code {coin_code}; value = {coin_value}")
-                if coin_value:
-                    print(f"Detected coin code {coin_code}; value = {coin_value}")
-                    self.CoinAcceptedSignal.emit(coin_value)
-                    self.credit = 0
-                    # self.update_credit(coin_value)
-                else:
-                    print(f"Unknown coin code: {coin_code}")
-
-            # Attempt next read
-            status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
 
 
 
