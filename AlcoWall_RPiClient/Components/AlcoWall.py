@@ -79,6 +79,8 @@ class AlcoWall(QMainWindow):
 
         # Set the video output to the QVideoWidget
         self.media_player.setVideoOutput(self.video_widget)
+        self.media_player.mediaStatusChanged.connect(self.on_media_status_changed)
+
 
         # Optionally, set media source here or elsewhere as needed
         # Example:
@@ -134,7 +136,10 @@ class AlcoWall(QMainWindow):
 
     @Slot()
     def on_media_status_changed(self, status):
+        """Slot to handle media status changes."""
+        print("Media status changed:", status)
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            print("Video finished.")
             self.video_finished.emit()
 
     @Slot(str)

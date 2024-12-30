@@ -52,7 +52,7 @@ class InitialState(State):
             print(f"Video URL: {alcoWall.next_add_url}")
             if os.path.exists(video_path):
                 print(f"Playing video: {video_path}")
-                alcoWall.video_widget.play_video(video_path)
+                alcoWall.play_video(video_path)
                 self.retry_timer.stop()  # Stop retrying
             else:
                 self.download_and_play_video(alcoWall.next_add_url, video_path)
@@ -72,7 +72,7 @@ class InitialState(State):
                 print(f"Video downloaded successfully and saved to {save_path}")
 
                 if self.is_video_corrupted(save_path):
-                    alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                    alcoWall.play_video("Media/videos/beer1.mp4")
                     print(f"Downloaded video is corrupted, deleting: {save_path}")
                     if os.path.exists(save_path):
                         os.remove(save_path)
@@ -85,22 +85,22 @@ class InitialState(State):
                             print(f"Converting video to {VIDEO_WIDTH}x{VIDEO_HEIGHT} resolution...")
                             if self.convert_video_to_resolution(save_path, VIDEO_WIDTH, VIDEO_HEIGHT):
                                 print("Video converted successfully.")
-                                alcoWall.video_widget.play_video(save_path)
+                                alcoWall.play_video(save_path)
                             else:
-                                alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                                alcoWall.play_video("Media/videos/beer1.mp4")
                                 print("Failed to convert video.")
                                 if os.path.exists(save_path):
                                     os.remove(save_path)
                     else:
                         print("Failed to get video resolution.")
-                        alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                        alcoWall.play_video("Media/videos/beer1.mp4")
 
             else:
                 print(f"Failed to download video. Status code: {response.status_code}")
-                alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+                alcoWall.play_video("Media/videos/beer1.mp4")
         except requests.ConnectionError as e:
             print(f"Connection error while downloading: {e}")
-            alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+            alcoWall.play_video("Media/videos/beer1.mp4")
 
     def is_video_corrupted(self, video_path):
         """Check if the video is corrupted using ffmpeg."""
