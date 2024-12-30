@@ -129,11 +129,6 @@ class AlcoWall(QMainWindow):
             main_videos_widget.setLayout(main_videos_widget_layout)
         main_videos_widget_layout.addWidget(self.workingWidget)
 
-        # Initially hide certain elements of the working widget
-        self.workingWidget.alcoholSensorText.hide()
-        self.workingWidget.lcdCounter.hide()
-        self.workingWidget.lcdNumber.hide()
-
     @Slot()
     def on_media_status_changed(self, status):
         """Slot to handle media status changes."""
