@@ -407,7 +407,6 @@ class CoinAcceptor(QObject):
 
                     if coin_value:
                         print(f"Coin accepted: Code {coin_code}, Value {coin_value}")
-                        self.update_credit(coin_value)
                         self.CoinAcceptedSignal.emit(coin_value)
                     else:
                         print(f"Unknown coin code received: {coin_code}")
