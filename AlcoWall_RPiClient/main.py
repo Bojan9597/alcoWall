@@ -16,7 +16,9 @@ if __name__ == "__main__":
     #ota testing
     from sensorReadout.SensorVariableUpdates import SensorVariableUpdates
     sensor_variable_updates = SensorVariableUpdates()
+    sensor_variable_updates.coinAcceptor.CoinAcceptedSignal.connect(alcoWall.update_credit)
     from States.InitialState import InitialState
     alcoWall.current_state = InitialState()
+
 
     sys.exit(app.exec())

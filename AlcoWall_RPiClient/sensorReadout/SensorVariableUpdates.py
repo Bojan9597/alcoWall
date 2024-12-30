@@ -31,7 +31,6 @@ class SensorVariableUpdates:
             self.coinAcceptor = CoinAcceptor()
             self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
             self.coin_thread.start()
-            self.coinAcceptor.CoinAcceptedSignal.connect(self.update_credit)
 
     def run_sensor_updates(self):
         while True:
