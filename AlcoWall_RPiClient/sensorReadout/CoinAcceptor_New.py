@@ -380,7 +380,7 @@ class CoinAcceptor(QObject):
 
             while True:
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-
+                print("Status read:", status)
                 # ----------------------------------------------------------------
                 # 1) Hardware Unresponsive or `status` is invalid
                 # ----------------------------------------------------------------
