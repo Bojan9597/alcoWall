@@ -30,7 +30,7 @@ class SensorVariableUpdates(QObject):
 
             from sensorReadout.CoinAcceptor_New import CoinAcceptor
             self.coinAcceptor = CoinAcceptor()
-            self.coinAcceptor.CoinAcceptedSignal.connect(sensor_variable_updates)
+            self.coinAcceptor.CoinAcceptedSignal.connect(self.update_credit)
             self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
             self.coin_thread.start()
 
