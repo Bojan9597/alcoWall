@@ -31,7 +31,7 @@ class InitialState(State):
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.play_next_video)
         self.start_fetching_videos()
-        alcoWall.video_widget.video_finished.connect(self.video_finished_handler)
+        alcoWall.video_finished.connect(self.video_finished_handler)
 
     def change_current_state_file(self):
         try:
@@ -57,7 +57,7 @@ class InitialState(State):
             else:
                 self.download_and_play_video(alcoWall.next_add_url, video_path)
         else:
-            alcoWall.video_widget.play_video("Media/videos/beer1.mp4")
+            alcoWall.play_video("Media/videos/beer1.mp4")
             print("Failed to retrieve video URL. Retrying...")
 #ota test
     def download_and_play_video(self, video_url, save_path):
