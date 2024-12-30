@@ -10,34 +10,19 @@ from serial.tools import list_ports
 from struct import unpack
 #test for ota
 def find_coin_acceptor():
+    # Check if the symbolic link exists
+    if os.path.exists("/dev/coin_acceptor"):
+        print("Coin acceptor found at /dev/coin_acceptor")
+        return "/dev/coin_acceptor"
+
+    # Fallback to scanning available ports
     ports = list_ports.comports()
     print("Available ports:")
     for port in ports:
         print(f"  {port.device} - {port.description}")
 
-    print("Finding coin acceptor on USB Port 3...")
-#test ota
-    for port in ports:
-        # Match the description for USB-UART LP
-        if "USB-UART LP" in port.description:
-            print(f"Coin acceptor found: {port.device}")
-            return port.device
-
-        # Alternatively, check if it matches /dev/ttyACM1
-        if port.device == "/dev/ttyACM1":
-            print(f"Coin acceptor found: {port.device}")
-            return port.device
-        if port.device == "/dev/ttyUSB0":
-            print(f"Coin acceptor found: {port.device}")
-            return port.device
-        if port.device == "/dev/ttyUSB1":
-            print(f"Coin acceptor found: {port.device}")
-            return port.device
-        if port.device == "/dev/ttyUSB2":
-            print(f"Coin acceptor found: {port.device}")
-            return port.device
-
-    raise Exception("Coin acceptor not found on USB Port 3. Ensure it is connected.")
+    print("Coin acceptor not found.")
+    return None
 
 def make_msg(code, data=None, to_slave_addr=2, from_host_addr=1):
     if not data:
