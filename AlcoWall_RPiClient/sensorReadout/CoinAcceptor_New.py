@@ -437,7 +437,6 @@ class CoinAcceptor(QObject):
                         print("Status read:", status)
                         last_status_number = status[0]
                     # Drain the hardware buffer so we don't miss multiple coins
-                    self._drain_coin_buffer(status)
 
                 # Sleep briefly to reduce load and let hardware settle
                 time.sleep(0.2)
@@ -462,6 +461,7 @@ class CoinAcceptor(QObject):
 
                 # If recognized coin code, update credit
                 coin_value = self.coin_dic.get(coin_code)
+                print(f"Detected coin code {coin_code}; value = {coin_value}")
                 if coin_value:
                     print(f"Detected coin code {coin_code}; value = {coin_value}")
                     self.CoinAcceptedSignal.emit(coin_value)
