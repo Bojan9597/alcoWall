@@ -362,72 +362,68 @@ class CoinAcceptor(QObject):
 
     def get_coin_type(self):
         """
-        Continuously polls the coin acceptor for new coins. If the hardware becomes
-        unresponsive, it attempts to reconnect. Once reconnected, it re-enables
-        coin acceptance and clears any stale data so that newly inserted coins 
-        are always processed exactly once.
+        Continuously polls the coin acceptor for new coins. Handles reconnection if the device becomes unresponsive.
         """
         print("Initializing coin acceptor...")
         self.coin_messenger.accept_coins(mask=[255, 255])
         self.accept_all_coins()
         print("Coin validator enabled. Waiting for coins...")
 
-        try:
-            # Perform an initial read
-            status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-            last_status_number = status[0] if status and len(status) >= 1 else None
-            print("Initial status read:", status)
+        last_status_number = None
 
-            while True:
+        while True:
+            try:
+                # Read the buffered credit or error codes
                 status = self.coin_messenger.request('read_buffered_credit_or_error_codes')
-                print("Status read:", status)
-                # ----------------------------------------------------------------
-                # 1) Hardware Unresponsive or `status` is invalid
-                # ----------------------------------------------------------------
+
+                # Handle invalid or unresponsive hardware
                 if not status:
+                    print("No response from coin acceptor. Attempting to reconnect...")
                     self.reject_all_coins()
-                    print("Coin acceptor not responding. Attempting reconnection...")
+                    time.sleep(1)  # Brief pause before reconnection attempt
 
-                    try:
-                        # Reconnect
-                        port = find_coin_acceptor()
-                        coin_validator_connection = make_serial_object(port)
-                        self.coin_messenger = CoinMessenger(coin_validator_connection)
-                        self.coin_messenger.set_accept_limit(25)
+                    # Try reconnecting
+                    port = find_coin_acceptor()
+                    if not port:
+                        print("Unable to find coin acceptor. Retrying...")
+                        time.sleep(3)  # Wait and retry
+                        continue
 
-                        # Clear stale data that might be in the buffer
-                        _ = self.coin_messenger.read_buffer()
+                    coin_validator_connection = make_serial_object(port)
+                    self.coin_messenger = CoinMessenger(coin_validator_connection)
+                    self.coin_messenger.set_accept_limit(25)
+                    self.coin_messenger.accept_coins(mask=[255, 255])
+                    self.accept_all_coins()
+                    print("Reconnected to coin acceptor.")
+                    last_status_number = None  # Reset last status
 
-                        # Re-enable acceptance
-                        self.coin_messenger.accept_coins(mask=[255, 255])
-                        self.accept_all_coins()
-                        print("Reconnected and coin acceptor reset.")
+                    continue  # Skip to the next loop iteration
 
-                        # Reset processed events set (hardware state has been reset)
-                        self.processed_status_numbers.clear()
+                # Process valid response
+                if len(status) > 1 and status[0] != last_status_number:
+                    last_status_number = status[0]  # Update last status number
+                    coin_code = status[1]
+                    coin_value = self.coin_dic.get(coin_code)
 
-                    except Exception as e:
-                        print(f"Error reconnecting to coin acceptor: {e}")
-                        time.sleep(3)
-                        continue  # Retry on next loop
-
-                # ----------------------------------------------------------------
-                # 2) Valid response from the hardware
-                # ----------------------------------------------------------------
-                elif status and len(status) > 1:
-                    if last_status_number != status[0]:
-                        coin_code     = status[1]
-                        coin_value = self.coin_dic.get(coin_code)
+                    if coin_value:
+                        print(f"Coin accepted: Code {coin_code}, Value {coin_value}")
+                        self.update_credit(coin_value)
                         self.CoinAcceptedSignal.emit(coin_value)
-                        print("Status read:", status)
-                        last_status_number = status[0]
-                    # Drain the hardware buffer so we don't miss multiple coins
+                    else:
+                        print(f"Unknown coin code received: {coin_code}")
 
-                # Sleep briefly to reduce load and let hardware settle
-                time.sleep(0.5)
+                time.sleep(0.5)  # Reduce load on the hardware
 
-        except KeyboardInterrupt:
-            print("Exiting coin listening loop.")
+            except serial.SerialException as e:
+                print(f"Serial exception: {e}. Reinitializing connection...")
+                time.sleep(2)  # Pause before retrying
+                continue
+
+        except Exception as e:
+            print(f"Unexpected error: {e}. Retrying...")
+            time.sleep(3)  # Wait before retrying
+            continue
+
 
     def _drain_coin_buffer(self, first_status):
         """
