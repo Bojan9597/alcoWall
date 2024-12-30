@@ -326,8 +326,9 @@ class CoinMessenger(object):
 
 import time
 import threading
-from PySide6.QtCore import Signal
-class CoinAcceptor:
+from PySide6.QtCore import QObject, Signal
+
+class CoinAcceptor(QObject):
     CoinAcceptedSignal = Signal(int)
     def __init__(self):
         port = find_coin_acceptor()
