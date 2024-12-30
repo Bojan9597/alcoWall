@@ -7,7 +7,7 @@ from PySide6.QtCore import QTimer
 from Components.AlcoWall import AlcoWall
 import os
 from Constants.GENERALCONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM, DEVICE_ID
-
+from PySide6.QtCore import Slot
 alcoWall = AlcoWall()
 
 class SensorVariableUpdates:
@@ -31,11 +31,16 @@ class SensorVariableUpdates:
             self.coinAcceptor = CoinAcceptor()
             self.coin_thread = threading.Thread(target=self.coinAcceptor.get_coin_type, daemon=True)
             self.coin_thread.start()
+            self.coinAcceptor.CoinAcceptedSignal.connect(self.update_credit)
 
     def run_sensor_updates(self):
         while True:
             self.check_variable_updates()
             threading.Event().wait(1)
+    
+    @Slot(str)
+    def update_credit(self, credit):
+            alcoWall.update_credit(credit)
 
     def check_variable_updates(self):
         if self.coinAcceptor and self.coinAcceptor.get_credit() > 0:

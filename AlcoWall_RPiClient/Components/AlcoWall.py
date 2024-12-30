@@ -40,6 +40,8 @@ class AlcoWall(QMainWindow):
         
         self.alcohol_level_to_show = 0
 
+        
+
         # Load the UI file
         loader = QUiLoader()
         file = QFile("UIFiles/VideoWidget.ui")

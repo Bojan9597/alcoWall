@@ -326,8 +326,9 @@ class CoinMessenger(object):
 
 import time
 import threading
-
+from PySide6.QtCore import Signal
 class CoinAcceptor:
+    CoinAcceptedSignal = Signal
     def __init__(self):
         port = find_coin_acceptor()
         coin_validator_connection = make_serial_object(port)
@@ -456,7 +457,9 @@ class CoinAcceptor:
                 coin_value = self.coin_dic.get(coin_code)
                 if coin_value:
                     print(f"Detected coin code {coin_code}; value = {coin_value}")
-                    self.update_credit(coin_value)
+                    self.CoinAcceptedSignal.emit(coin_value)
+                    self.credit = 0
+                    # self.update_credit(coin_value)
                 else:
                     print(f"Unknown coin code: {coin_code}")
 
