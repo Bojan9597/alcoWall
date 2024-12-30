@@ -38,7 +38,7 @@ class SensorVariableUpdates:
             self.check_variable_updates()
             threading.Event().wait(1)
     
-    @Slot(str)
+    @Slot(int)
     def update_credit(self, credit):
             alcoWall.update_credit(credit)
 

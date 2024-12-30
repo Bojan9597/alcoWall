@@ -328,7 +328,7 @@ import time
 import threading
 from PySide6.QtCore import Signal
 class CoinAcceptor:
-    CoinAcceptedSignal = Signal
+    CoinAcceptedSignal = Signal(int)Components/AlcoWall.py
     def __init__(self):
         port = find_coin_acceptor()
         coin_validator_connection = make_serial_object(port)
