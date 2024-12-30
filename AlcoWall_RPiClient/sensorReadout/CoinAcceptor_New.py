@@ -57,51 +57,55 @@ def read_message(serial_object):
     return reply
 
 def send_message_and_get_reply(serial_object, message, verbose=False):
-    if not serial_object.isOpen():
-        msg = 'The serial port is not open.'
-        raise UserWarning(msg, (serial_object.isOpen()))
+    try:
+        if not serial_object.isOpen():
+            msg = 'The serial port is not open.'
+            raise UserWarning(msg, (serial_object.isOpen()))
 
-    # Convert message to bytes
-    packet = bytes(message['message'])  # Fix: Ensure message is bytes
-    serial_object.reset_input_buffer()
-    serial_object.reset_output_buffer()
+        # Convert message to bytes
+        packet = bytes(message['message'])  # Fix: Ensure message is bytes
+        serial_object.reset_input_buffer()
+        serial_object.reset_output_buffer()
 
-    # Send message
-    serial_object.write(packet)
+        # Send message
+        serial_object.write(packet)
 
-    # Read and process response
-    output = read_message(serial_object)
-    reply = read_message(serial_object)
+        # Read and process response
+        output = read_message(serial_object)
+        reply = read_message(serial_object)
 
-    if not reply or reply[0] != 1:
-        return False 
+        if not reply or reply[0] != 1:
+            return False 
 
-    reply_length = reply[1]
-    expected_length = message['bytes_expected']
-    reply_type = message['type_returned']
+        reply_length = reply[1]
+        expected_length = message['bytes_expected']
+        reply_type = message['type_returned']
 
-    if len(reply) < 2:
-        print('Received small message: {0}'.format(reply))
+        if len(reply) < 2:
+            print('Received small message: {0}'.format(reply))
+            return False
+
+        if verbose:
+            print("Received {0} bytes:".format(len(reply)))
+
+        if expected_length != -1 and reply_length != expected_length:
+            print('Expected {1} bytes but received {0}'.format(reply_length, expected_length))
+            return False
+
+        reply_data = reply[4:-1]
+        
+        # Return parsed data based on type
+        if reply_type is str:
+            return str().join(map(chr, reply_data))
+        elif reply_type is int:
+            return reply_data
+        elif reply_type is bool:
+            return True
+        else:
+            return list(map(chr, reply))
+    except Exception as e:
+        print(f"Error sending message: {e}")
         return False
-
-    if verbose:
-        print("Received {0} bytes:".format(len(reply)))
-
-    if expected_length != -1 and reply_length != expected_length:
-        print('Expected {1} bytes but received {0}'.format(reply_length, expected_length))
-        return False
-
-    reply_data = reply[4:-1]
-    
-    # Return parsed data based on type
-    if reply_type is str:
-        return str().join(map(chr, reply_data))
-    elif reply_type is int:
-        return reply_data
-    elif reply_type is bool:
-        return True
-    else:
-        return list(map(chr, reply))
 
 
 def make_serial_object(tty_port):
