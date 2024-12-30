@@ -8,13 +8,13 @@ from Components.AlcoWall import AlcoWall
 import os
 from Constants.GENERALCONSTANTS import TARGET_PLATFORM_ARCHITECTURE, TARGET_PLATFORM_SYSTEM, DEVICE_ID
 from PySide6.QtCore import Slot
+from PySide6.QtCore import QObject
 alcoWall = AlcoWall()
 
-class SensorVariableUpdates:
+class SensorVariableUpdates(QObject):
     def __init__(self):
         self.alcoholSensor = None
         self.coin_insertions = []
-        self.coinAcceptor = None
 
         # Start a new thread to handle sensor updates and network requests
         self.thread = threading.Thread(target=self.run_sensor_updates, daemon=True)
