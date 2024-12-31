@@ -4,9 +4,11 @@ import time
 # LED strip configuration:
 LED_COUNT = 80      # Number of LED pixels.
 LED_PIN = 18        # GPIO pin connected to the pixels (must support PWM!).
+BRIGHTNESS = 128    # Brightness level (0-255)
 
 # Create PixelStrip object:
 strip = PixelStrip(LED_COUNT, LED_PIN)
+strip.setBrightness(BRIGHTNESS)  # Set initial brightness
 strip.begin()
 
 # Define colors
