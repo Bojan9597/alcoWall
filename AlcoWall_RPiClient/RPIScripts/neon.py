@@ -28,7 +28,7 @@ def wheel(pos):
         return Color(0, pos * 3, 255 - pos * 3)
 
 # Pattern 0: Breathing Effect
-def pattern_breathing(strip, color, wait_ms=20, breaths=15):
+def pattern_breathing(strip, color, wait_ms=50, breaths=15):
     """Create a breathing (fade in and out) effect with indigo color."""
     for _ in range(breaths):
         # Fade in
@@ -149,7 +149,7 @@ def pattern_all_on(strip, color, duration=10):
 def main():
     while True:
         print("Running Pattern 0: Breathing Effect")
-        pattern_breathing(strip, INDIGO, wait_ms=20, breaths=15)
+        pattern_breathing(strip, INDIGO, wait_ms=100, breaths=15)
         
         print("Running Pattern 1: Theater Chase")
         pattern_theater_chase(strip, INDIGO, wait_ms=50, iterations=10)
