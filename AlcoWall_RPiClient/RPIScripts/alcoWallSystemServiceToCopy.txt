@@ -9,7 +9,7 @@ WorkingDirectory=/home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/
 Environment="HOME=/home/bojan"
 Environment="DISPLAY=:0"
 
-ExecStart=/home/bojan/AlcoWallEnvironment/bin/python3 /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/update_over_the_air_script.py
+ExecStart=/home/bojan/Desktop/AlcoWallEnvironment/bin/python3 /home/bojan/Desktop/AlcoWall/alcowall/AlcoWall_RPiClient/update_over_the_air_script.py
 
 StandardOutput=journal
 StandardError=journal
