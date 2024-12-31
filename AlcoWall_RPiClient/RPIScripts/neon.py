@@ -35,26 +35,36 @@ def pattern_turn_on_off(strip, color, wait_ms=50):
         strip.show()
         time.sleep(wait_ms / 1000.0)
 
-# Pattern 3: Create a circular effect
-def pattern_circular(strip, color, initial_segment_size=1, max_segment_size=80, wait_ms=50):
-    """Create a circular effect with a progressively larger segment size."""
-    segment_size = initial_segment_size
-    while segment_size <= max_segment_size:
+# Modified Pattern 3: Continuous Circular Effect
+def pattern_circular_continuous(strip, color, wait_ms=50):
+    """Create a continuous circular effect."""
+    segment_size = 1
+    max_segment_size = strip.numPixels()
+
+    while True:
         for offset in range(strip.numPixels()):
             for i in range(strip.numPixels()):
-                if i >= offset and i < offset + segment_size:
+                # Active LEDs
+                if offset <= i < offset + segment_size:
                     strip.setPixelColor(i % strip.numPixels(), color)
+                # Preceding LEDs stay active
+                elif i < offset:
+                    strip.setPixelColor(i, color)
                 else:
                     strip.setPixelColor(i, Color(0, 0, 0))
             strip.show()
             time.sleep(wait_ms / 1000.0)
-        segment_size += 2  # Increase segment size for the next iteration
+
+        # Increment segment size and reset if it exceeds the maximum
+        segment_size += 6
+        if segment_size > max_segment_size:
+            segment_size = 1
 
 # Main loop to execute the patterns in sequence
 def main():
     while True:
-        print("Running Pattern 3: Circular Effect")
-        pattern_circular(strip, INDIGO, initial_segment_size=1, max_segment_size=80, wait_ms=50)
+        print("Running Pattern 3: Circular Continuous Effect")
+        pattern_circular_continuous(strip, INDIGO, wait_ms=50)
 
         print("Running Pattern 2: Turn LEDs On/Off One by One")
         pattern_turn_on_off(strip, INDIGO, wait_ms=50)
