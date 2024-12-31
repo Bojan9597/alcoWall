@@ -1,10 +1,11 @@
 from rpi_ws281x import PixelStrip, Color
 import time
+import random  # Needed for Twinkling Stars pattern
 
 # LED strip configuration:
-LED_COUNT = 80      # Number of LED pixels.
-LED_PIN = 18        # GPIO pin connected to the pixels (must support PWM!).
-BRIGHTNESS = 128    # Brightness level (0-255)
+LED_COUNT = 80          # Number of LED pixels.
+LED_PIN = 18            # GPIO pin connected to the pixels (must support PWM!).
+BRIGHTNESS = 128        # Brightness level (0-255)
 
 # Create PixelStrip object:
 strip = PixelStrip(LED_COUNT, LED_PIN)
@@ -61,18 +62,78 @@ def pattern_twinkling_stars(strip, color, star_count=10, wait_ms=100):
         for i in star_pixels:
             strip.setPixelColor(i, 0)
         strip.show()
+        time.sleep(wait_ms / 1000.0)
 
-# Existing Patterns (already in your code)
-
-# Pattern 3: Turn on all LEDs with indigo color
-def pattern_all_on(strip, color, duration=10):
-    """Turn on all LEDs with a given color and hold for the specified duration."""
+# Pattern 3: Color Wipe
+def pattern_color_wipe(strip, color, wait_ms=50):
+    """Wipe color across display a pixel at a time, then wipe off."""
+    # Wipe on
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
-    strip.show()
-    time.sleep(duration)
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
+    # Wipe off
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, 0)
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
 
-# Pattern 4: Turn LEDs on and off one by one
+# Pattern 4: Color Bounce
+def pattern_color_bounce(strip, color, wait_ms=50):
+    """Bounce color back and forth along the strip."""
+    # Forward direction
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, color)
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
+        strip.setPixelColor(i, 0)
+    # Backward direction
+    for i in range(strip.numPixels() - 1, -1, -1):
+        strip.setPixelColor(i, color)
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
+        strip.setPixelColor(i, 0)
+
+# Pattern 5: Breathing Effect
+def pattern_breathing(strip, color, wait_ms=20, breaths=3):
+    """Create a breathing (fade in and out) effect."""
+    for _ in range(breaths):
+        # Fade in
+        for brightness in range(0, BRIGHTNESS + 1, 5):
+            strip.setBrightness(brightness)
+            for i in range(strip.numPixels()):
+                strip.setPixelColor(i, color)
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+        # Fade out
+        for brightness in range(BRIGHTNESS, -1, -5):
+            strip.setBrightness(brightness)
+            for i in range(strip.numPixels()):
+                strip.setPixelColor(i, color)
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+    # Reset brightness to initial value
+    strip.setBrightness(BRIGHTNESS)
+    strip.show()
+
+# Existing Patterns
+
+# Pattern 6: Circular Effect
+def pattern_circular(strip, color, initial_segment_size=1, max_segment_size=80, wait_ms=50):
+    """Create a circular effect with a progressively larger segment size."""
+    segment_size = initial_segment_size
+    while segment_size <= max_segment_size:
+        for offset in range(strip.numPixels()):
+            for i in range(strip.numPixels()):
+                if offset <= i < offset + segment_size:
+                    strip.setPixelColor(i % strip.numPixels(), color)
+                else:
+                    strip.setPixelColor(i, 0)
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+        segment_size += 6  # Increase segment size for the next iteration
+
+# Pattern 7: Turn LEDs On/Off One by One
 def pattern_turn_on_off(strip, color, wait_ms=50):
     """Turn LEDs on one by one, then off one by one."""
     # Turn LEDs on one by one
@@ -80,27 +141,19 @@ def pattern_turn_on_off(strip, color, wait_ms=50):
         strip.setPixelColor(i, color)
         strip.show()
         time.sleep(wait_ms / 1000.0)
-
     # Turn LEDs off one by one
     for i in range(strip.numPixels() - 1, -1, -1):
-        strip.setPixelColor(i, Color(0, 0, 0))
+        strip.setPixelColor(i, 0)
         strip.show()
         time.sleep(wait_ms / 1000.0)
 
-# Pattern 5: Create a circular effect
-def pattern_circular(strip, color, initial_segment_size=1, max_segment_size=80, wait_ms=50):
-    """Create a circular effect with a progressively larger segment size."""
-    segment_size = initial_segment_size
-    while segment_size <= max_segment_size:
-        for offset in range(strip.numPixels()):
-            for i in range(strip.numPixels()):
-                if i >= offset and i < offset + segment_size:
-                    strip.setPixelColor(i % strip.numPixels(), color)
-                else:
-                    strip.setPixelColor(i, Color(0, 0, 0))
-            strip.show()
-            time.sleep(wait_ms / 1000.0)
-        segment_size += 6  # Increase segment size for the next iteration
+# Pattern 8: All LEDs On
+def pattern_all_on(strip, color, duration=10):
+    """Turn on all LEDs with a given color and hold for the specified duration."""
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, color)
+    strip.show()
+    time.sleep(duration)
 
 # Main loop to execute the patterns in sequence
 def main():
@@ -114,14 +167,32 @@ def main():
         print("Running Pattern 2: Twinkling Stars")
         pattern_twinkling_stars(strip, INDIGO, star_count=10, wait_ms=100)
 
-        print("Running Pattern 3: Circular Effect")
+        print("Running Pattern 3: Color Wipe")
+        pattern_color_wipe(strip, INDIGO, wait_ms=50)
+
+        print("Running Pattern 4: Color Bounce")
+        pattern_color_bounce(strip, INDIGO, wait_ms=50)
+
+        print("Running Pattern 5: Breathing Effect")
+        pattern_breathing(strip, INDIGO, wait_ms=20, breaths=3)
+
+        print("Running Pattern 6: Circular Effect")
         pattern_circular(strip, INDIGO, initial_segment_size=1, max_segment_size=80, wait_ms=50)
 
-        print("Running Pattern 4: Turn LEDs On/Off One by One")
+        print("Running Pattern 7: Turn LEDs On/Off One by One")
         pattern_turn_on_off(strip, INDIGO, wait_ms=50)
 
-        print("Running Pattern 5: All LEDs On")
+        print("Running Pattern 8: All LEDs On")
         pattern_all_on(strip, INDIGO, duration=10)
 
+# Entry point
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nExiting program...")
+        # Turn off all LEDs before exiting
+        for i in range(strip.numPixels()):
+            strip.setPixelColor(i, 0)
+        strip.show()
+        GPIO.cleanup()  # If using RPi.GPIO elsewhere
