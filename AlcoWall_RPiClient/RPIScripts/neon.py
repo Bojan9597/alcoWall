@@ -149,7 +149,7 @@ def pattern_all_on(strip, color, duration=10):
 def main():
     while True:
         print("Running Pattern 0: Breathing Effect")
-        pattern_breathing(strip, INDIGO, wait_ms=100, breaths=15)
+        pattern_breathing(strip, INDIGO, wait_ms=60, breaths=15)
         
         print("Running Pattern 1: Theater Chase")
         pattern_theater_chase(strip, INDIGO, wait_ms=50, iterations=10)
