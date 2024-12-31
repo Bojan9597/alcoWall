@@ -13,7 +13,7 @@ strip.setBrightness(BRIGHTNESS)  # Set initial brightness
 strip.begin()
 
 # Define colors
-INDIGO = Color(31, 9, 84)  # Indigo color (adjust as needed)
+INDIGO = Color(31, 9, 84)  # Indigo color
 
 # Helper function: Color wheel
 def wheel(pos):
@@ -27,15 +27,27 @@ def wheel(pos):
         pos -= 170
         return Color(0, pos * 3, 255 - pos * 3)
 
-# Pattern 0: Rainbow Cycle
-def pattern_rainbow_cycle(strip, wait_ms=20, iterations=5):
-    """Draw rainbow colors that uniformly wrap around the strip."""
-    for j in range(256 * iterations):  # Iterations define how many full cycles to run
-        for i in range(strip.numPixels()):
-            pixel_index = (i * 256 // strip.numPixels()) + j
-            strip.setPixelColor(i, wheel(pixel_index & 255))
-        strip.show()
-        time.sleep(wait_ms / 1000.0)
+# Pattern 0: Breathing Effect
+def pattern_breathing(strip, color, wait_ms=20, breaths=3):
+    """Create a breathing (fade in and out) effect with indigo color."""
+    for _ in range(breaths):
+        # Fade in
+        for brightness in range(0, BRIGHTNESS + 1, 5):
+            strip.setBrightness(brightness)
+            for i in range(strip.numPixels()):
+                strip.setPixelColor(i, color)
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+        # Fade out
+        for brightness in range(BRIGHTNESS, -1, -5):
+            strip.setBrightness(brightness)
+            for i in range(strip.numPixels()):
+                strip.setPixelColor(i, color)
+            strip.show()
+            time.sleep(wait_ms / 1000.0)
+    # Reset brightness to initial value
+    strip.setBrightness(BRIGHTNESS)
+    strip.show()
 
 # Pattern 1: Theater Chase
 def pattern_theater_chase(strip, color, wait_ms=50, iterations=10):
@@ -43,11 +55,13 @@ def pattern_theater_chase(strip, color, wait_ms=50, iterations=10):
     for j in range(iterations):
         for q in range(3):
             for i in range(0, strip.numPixels(), 3):
-                strip.setPixelColor(i + q, color)
+                if i + q < strip.numPixels():
+                    strip.setPixelColor(i + q, color)
             strip.show()
             time.sleep(wait_ms / 1000.0)
             for i in range(0, strip.numPixels(), 3):
-                strip.setPixelColor(i + q, 0)
+                if i + q < strip.numPixels():
+                    strip.setPixelColor(i + q, 0)
 
 # Pattern 2: Twinkling Stars
 def pattern_twinkling_stars(strip, color, star_count=10, wait_ms=100):
@@ -94,31 +108,7 @@ def pattern_color_bounce(strip, color, wait_ms=50):
         time.sleep(wait_ms / 1000.0)
         strip.setPixelColor(i, 0)
 
-# Pattern 5: Breathing Effect
-def pattern_breathing(strip, color, wait_ms=20, breaths=3):
-    """Create a breathing (fade in and out) effect."""
-    for _ in range(breaths):
-        # Fade in
-        for brightness in range(0, BRIGHTNESS + 1, 5):
-            strip.setBrightness(brightness)
-            for i in range(strip.numPixels()):
-                strip.setPixelColor(i, color)
-            strip.show()
-            time.sleep(wait_ms / 1000.0)
-        # Fade out
-        for brightness in range(BRIGHTNESS, -1, -5):
-            strip.setBrightness(brightness)
-            for i in range(strip.numPixels()):
-                strip.setPixelColor(i, color)
-            strip.show()
-            time.sleep(wait_ms / 1000.0)
-    # Reset brightness to initial value
-    strip.setBrightness(BRIGHTNESS)
-    strip.show()
-
-# Existing Patterns
-
-# Pattern 6: Circular Effect
+# Pattern 5: Circular Effect
 def pattern_circular(strip, color, initial_segment_size=1, max_segment_size=80, wait_ms=50):
     """Create a circular effect with a progressively larger segment size."""
     segment_size = initial_segment_size
@@ -133,7 +123,7 @@ def pattern_circular(strip, color, initial_segment_size=1, max_segment_size=80, 
             time.sleep(wait_ms / 1000.0)
         segment_size += 6  # Increase segment size for the next iteration
 
-# Pattern 7: Turn LEDs On/Off One by One
+# Pattern 6: Turn LEDs On/Off One by One
 def pattern_turn_on_off(strip, color, wait_ms=50):
     """Turn LEDs on one by one, then off one by one."""
     # Turn LEDs on one by one
@@ -147,7 +137,7 @@ def pattern_turn_on_off(strip, color, wait_ms=50):
         strip.show()
         time.sleep(wait_ms / 1000.0)
 
-# Pattern 8: All LEDs On
+# Pattern 7: All LEDs On
 def pattern_all_on(strip, color, duration=10):
     """Turn on all LEDs with a given color and hold for the specified duration."""
     for i in range(strip.numPixels()):
@@ -158,31 +148,28 @@ def pattern_all_on(strip, color, duration=10):
 # Main loop to execute the patterns in sequence
 def main():
     while True:
-        print("Running Pattern 0: Rainbow Cycle")
-        pattern_rainbow_cycle(strip, wait_ms=20, iterations=5)
-
+        print("Running Pattern 0: Breathing Effect")
+        pattern_breathing(strip, INDIGO, wait_ms=20, breaths=3)
+        
         print("Running Pattern 1: Theater Chase")
         pattern_theater_chase(strip, INDIGO, wait_ms=50, iterations=10)
-
+        
         print("Running Pattern 2: Twinkling Stars")
         pattern_twinkling_stars(strip, INDIGO, star_count=10, wait_ms=100)
-
+        
         print("Running Pattern 3: Color Wipe")
         pattern_color_wipe(strip, INDIGO, wait_ms=50)
-
+        
         print("Running Pattern 4: Color Bounce")
         pattern_color_bounce(strip, INDIGO, wait_ms=50)
-
-        print("Running Pattern 5: Breathing Effect")
-        pattern_breathing(strip, INDIGO, wait_ms=20, breaths=3)
-
-        print("Running Pattern 6: Circular Effect")
+        
+        print("Running Pattern 5: Circular Effect")
         pattern_circular(strip, INDIGO, initial_segment_size=1, max_segment_size=80, wait_ms=50)
-
-        print("Running Pattern 7: Turn LEDs On/Off One by One")
+        
+        print("Running Pattern 6: Turn LEDs On/Off One by One")
         pattern_turn_on_off(strip, INDIGO, wait_ms=50)
-
-        print("Running Pattern 8: All LEDs On")
+        
+        print("Running Pattern 7: All LEDs On")
         pattern_all_on(strip, INDIGO, duration=10)
 
 # Entry point
@@ -195,4 +182,3 @@ if __name__ == "__main__":
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, 0)
         strip.show()
-        GPIO.cleanup()  # If using RPi.GPIO elsewhere
