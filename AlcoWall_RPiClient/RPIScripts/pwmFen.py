@@ -1,46 +1,35 @@
-import pigpio
+import RPi.GPIO as GPIO
 import time
 
 # Constants
-PWM_PIN = 13  # GPIO33 in BCM mode
-FREQ = 25000  # PWM frequency (25kHz is standard for fans)
+PWM_PIN = 12  # GPIO Pin 12 corresponds to physical pin 32
+FREQ = 2500  # PWM Frequency in Hz (25kHz for fan control)
 
-def setup_pwm(pi, pin, freq):
-    """Setup the PWM on the given pin with the specified frequency."""
-    pi.set_mode(pin, pigpio.OUTPUT)
-    pi.set_PWM_frequency(pin, freq)
-    print(f"Initialized PWM on GPIO{pin} at {freq} Hz.")
+def setup_pwm():
+    """Setup the PWM pin."""
+    GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
+    GPIO.setup(PWM_PIN, GPIO.OUT)  # Set pin as output
+    pwm = GPIO.PWM(PWM_PIN, FREQ)  # Initialize PWM on the specified pin and frequency
+    pwm.start(0)  # Start PWM with 0% duty cycle (fan off)
+    return pwm
 
-def set_fan_speed(pi, pin, duty_cycle):
+def set_fan_speed(pwm, duty_cycle):
     """Set the fan speed with the given duty cycle (0-100%)."""
-    pwm_value = int(duty_cycle * 255 / 100)  # Convert duty cycle to range 0-255
-    pi.set_PWM_dutycycle(pin, pwm_value)  # Set PWM duty cycle
-    print(f"Set fan speed to {duty_cycle}% (PWM value: {pwm_value}).")
+    pwm.ChangeDutyCycle(duty_cycle)  # Adjust the duty cycle
 
 def main():
-    pi = pigpio.pi()
-    if not pi.connected:
-        print("Failed to connect to pigpio daemon.")
-        return
-
+    pwm = setup_pwm()
     try:
-        setup_pwm(pi, PWM_PIN, FREQ)
-
-        print("Setting fan to half speed (50%)")
-        set_fan_speed(pi, PWM_PIN, 50)  # Half speed
-        time.sleep(10)
-
-        print("Setting fan to full speed (100%)")
-        set_fan_speed(pi, PWM_PIN, 100)  # Full speed
-        time.sleep(10)
-
-        print("Turning off the fan")
-        set_fan_speed(pi, PWM_PIN, 0)  # Turn off
+        print("Running fan at 60% speed")
+        while True:  # Continuous loop
+            set_fan_speed(pwm, 60)  # Set fan speed to 80%
+            time.sleep(1)  # Add a delay to reduce CPU usage
     except KeyboardInterrupt:
         print("Exiting...")
     finally:
-        set_fan_speed(pi, PWM_PIN, 0)  # Ensure fan is off
-        pi.stop()
+        set_fan_speed(pwm, 0)  # Turn off the fan
+        pwm.stop()  # Stop PWM
+        GPIO.cleanup()  # Cleanup GPIO settings
 
 if __name__ == "__main__":
     main()
